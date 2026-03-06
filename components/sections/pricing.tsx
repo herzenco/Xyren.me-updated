@@ -57,10 +57,10 @@ export function Pricing() {
         {/* Section header */}
         <div className="mx-auto max-w-3xl text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-            Simple pricing.
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Simple pricing.</span>
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-            One-time project fee. No monthly retainers. No hidden costs. You own everything.
+            <span className="text-blue-600 font-semibold">One-time project fee.</span> <span className="text-purple-600 font-semibold">No monthly retainers.</span> No hidden costs. You own everything.
           </p>
         </div>
 

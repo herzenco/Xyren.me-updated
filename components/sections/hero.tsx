@@ -25,12 +25,12 @@ export function Hero() {
 
         {/* Hero headline - core value prop */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-8">
-          Compete with bigger companies.
+          Compete with <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">bigger companies.</span>
         </h1>
 
         {/* Subheading */}
         <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 leading-relaxed">
-          Xyren builds websites for small businesses with powerful, built-in lead capture and AI analytics. Everything you need at prices you can afford.
+          Xyren builds websites for small businesses with <span className="text-blue-600 font-semibold">powerful, built-in lead capture</span> and <span className="text-purple-600 font-semibold">AI analytics</span>. Everything you need at prices you can afford.
         </p>
 
         {/* CTAs */}

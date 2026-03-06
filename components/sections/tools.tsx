@@ -41,10 +41,10 @@ export function Tools() {
         {/* Section header */}
         <div className="mx-auto max-w-3xl text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-            Everything you need built in.
+            Everything you need <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">built in.</span>
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-            No plugins. No third-party tools. No integrations. Just a complete system designed to help
+            <span className="text-blue-600 font-semibold">No plugins.</span> <span className="text-purple-600 font-semibold">No third-party tools.</span> <span className="text-blue-600 font-semibold">No integrations.</span> Just a complete system designed to help
             you capture leads and understand your customers.
           </p>
         </div>

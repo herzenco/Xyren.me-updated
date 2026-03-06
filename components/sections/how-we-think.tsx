@@ -35,7 +35,7 @@ export function HowWeThink() {
         {/* Section header */}
         <div className="mx-auto max-w-3xl text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-            Built differently.
+            Built <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">differently.</span>
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
             Most web agencies build nice-looking sites that don't convert. We focus on results —
