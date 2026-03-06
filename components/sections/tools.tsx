@@ -36,9 +36,7 @@ const features = [
 
 export function Tools() {
   return (
-    <section className="py-24 md:py-32 lg:py-40" style={{
-      background: 'linear-gradient(135deg, #f0f4ff 0%, #f9f5ff 100%)'
-    }}>
+    <section className="bg-muted/50 py-24 md:py-32 lg:py-40">
       <div className="mx-auto max-w-6xl px-6 md:px-8">
         {/* Section header */}
         <div className="mx-auto max-w-3xl text-center mb-20">

@@ -13,14 +13,12 @@ const features = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden py-24 md:py-32 lg:py-40" style={{
-      background: 'linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%)'
-    }}>
+    <section className="relative overflow-hidden py-24 md:py-32 lg:py-40 bg-background">
       <div className="mx-auto max-w-5xl px-6 md:px-8 text-center">
         {/* Small badge */}
         <div className="inline-block mb-8">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 text-sm font-medium text-foreground">
-            <Zap className="h-4 w-4" style={{ background: 'linear-gradient(135deg, #0066ff 0%, #6366f1 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }} />
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border text-sm font-medium text-foreground">
+            <Zap className="h-4 w-4 text-blue-600" />
             Powerful tools for small teams
           </span>
         </div>
