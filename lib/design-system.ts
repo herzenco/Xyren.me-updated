@@ -99,6 +99,13 @@ export const designSystem = {
     xl: '1280px',
     '2xl': '1536px',
   },
+
+  gradients: {
+    primary: 'var(--gradient-primary)',
+    primaryAlt: 'var(--gradient-primary-alt)',
+    accent: 'var(--gradient-accent)',
+    subtle: 'var(--gradient-subtle)',
+  },
 } as const;
 
 // Export type for strict typing

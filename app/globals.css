@@ -91,6 +91,12 @@
   --space-3xl: 4rem;
   --space-4xl: 5rem;
   --space-5xl: 6rem;
+
+  /* Gradient definitions */
+  --gradient-primary: linear-gradient(135deg, #0066ff 0%, #6366f1 100%);
+  --gradient-primary-alt: linear-gradient(135deg, #0066ff 0%, #06b6d4 100%);
+  --gradient-accent: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --gradient-subtle: linear-gradient(135deg, #0066ff15 0%, #6366f115 100%);
 }
 
 .dark {
