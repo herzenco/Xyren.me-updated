@@ -49,14 +49,13 @@ export default function ProfessionalServicesPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-b from-background to-muted/30 py-20 md:py-28">
-        <div className="container mx-auto px-4 text-center">
-          <Badge variant="secondary" className="mb-6">Professional Services</Badge>
-          <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-            A website that positions you as the{' '}
-            <span className="text-primary">obvious expert</span>
+      <section className="bg-background py-24 md:py-32 lg:py-40">
+        <div className="mx-auto max-w-4xl px-6 md:px-8 text-center">
+          <Badge variant="secondary" className="mb-8">Professional Services</Badge>
+          <h1 className="mx-auto max-w-4xl text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-8">
+            Position yourself as the <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">obvious expert</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-8 max-w-2xl text-xl md:text-2xl text-muted-foreground leading-relaxed">
             Lawyers, consultants, accountants — your clients Google you before they hire you.
             Make sure what they find builds trust and drives them to book.
           </p>

@@ -47,16 +47,15 @@ export default function HomeServicesPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-b from-background to-muted/30 py-20 md:py-28">
-        <div className="container mx-auto px-4 text-center">
-          <Badge variant="secondary" className="mb-6">Home Services</Badge>
-          <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-            More calls. More jobs.{' '}
-            <span className="text-primary">Less chasing.</span>
+      <section className="bg-background py-24 md:py-32 lg:py-40">
+        <div className="mx-auto max-w-4xl px-6 md:px-8 text-center">
+          <Badge variant="secondary" className="mb-8">Home Services</Badge>
+          <h1 className="mx-auto max-w-4xl text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-8">
+            More calls. More jobs. <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Less chasing.</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-8 max-w-2xl text-xl md:text-2xl text-muted-foreground leading-relaxed">
             Your next customer is searching Google right now. Make sure your site shows up,
-            loads fast, and convinces them to call you — not your competitor.
+            loads fast, and <span className="text-blue-600 font-semibold">convinces them to call</span> you — not your competitor.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
