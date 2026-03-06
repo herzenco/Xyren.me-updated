@@ -1,121 +1,133 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { CheckCircle } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Check } from 'lucide-react'
 
 const plans = [
   {
     name: 'Starter',
-    price: '$1,500',
-    description: 'Perfect for getting online fast with a professional presence.',
+    price: 2500,
+    description: 'Perfect for getting online with lead capture.',
     features: [
-      'Up to 5 pages',
-      'Mobile-responsive design',
-      'Contact form',
-      'Basic SEO setup',
-      'Google Analytics',
-      '2 rounds of revisions',
-      '5-day turnaround',
+      'Up to 10 pages',
+      'Lead capture form',
+      'Mobile responsive',
+      'SEO optimized',
+      'Email support',
+      '5-day build',
     ],
-    cta: 'Get Started',
-    popular: false,
+    featured: false,
   },
   {
     name: 'Growth',
-    price: '$2,800',
-    description: 'The complete package for businesses serious about lead generation.',
-    features: [
-      'Up to 10 pages',
-      'Online appointment booking',
-      'Lead capture forms',
-      'Full SEO optimization',
-      'Blog setup (5 posts)',
-      'Google Reviews integration',
-      'Chat widget',
-      '3 rounds of revisions',
-      '7-day turnaround',
-    ],
-    cta: 'Get Started',
-    popular: true,
-  },
-  {
-    name: 'Authority',
-    price: '$5,000',
-    description: 'For established businesses that want to dominate their local market.',
+    price: 4500,
+    description: 'Everything you need to compete with bigger companies.',
     features: [
       'Unlimited pages',
-      'Custom booking system',
-      'Advanced lead funnels',
-      'Full content strategy',
-      'Blog setup (15 posts)',
-      'Schema markup',
-      'Performance optimization',
-      'Admin dashboard',
-      'Unlimited revisions',
-      '10-day turnaround',
+      'AI lead scoring',
+      'Advanced analytics',
+      'Booking integration',
+      'Blog & content',
+      'Phone support',
+      '7-day build',
     ],
-    cta: 'Get Started',
-    popular: false,
+    featured: true,
+  },
+  {
+    name: 'Enterprise',
+    price: 7500,
+    description: 'Custom solutions for serious growth.',
+    features: [
+      'Everything in Growth',
+      'Custom integrations',
+      'Advanced automation',
+      'Dedicated support',
+      'Performance tuning',
+      'Priority updates',
+      'Custom timeline',
+    ],
+    featured: false,
   },
 ]
 
 export function Pricing() {
   return (
-    <section id="pricing" className="py-20 md:py-28 bg-muted/30">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Simple, transparent pricing
+    <section id="pricing" className="py-24 md:py-32 lg:py-40">
+      <div className="mx-auto max-w-6xl px-6 md:px-8">
+        {/* Section header */}
+        <div className="mx-auto max-w-3xl text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
+            Simple pricing.
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            One-time project fee. No hidden costs. No recurring agency retainers.
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+            One-time project fee. No monthly retainers. No hidden costs. You own everything.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 items-start">
+        {/* Pricing cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-16">
           {plans.map((plan) => (
             <Card
               key={plan.name}
-              className={`relative ${plan.popular ? 'border-primary shadow-lg scale-[1.02]' : ''}`}
+              className={`relative p-8 md:p-10 flex flex-col ${
+                plan.featured ? 'ring-2 ring-accent md:scale-105' : ''
+              }`}
             >
-              {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  Most Popular
-                </Badge>
-              )}
-              <CardHeader className="pb-4 pt-8">
-                <h3 className="text-xl font-bold">{plan.name}</h3>
-                <div className="mt-2">
-                  <span className="text-4xl font-extrabold">{plan.price}</span>
-                  <span className="text-muted-foreground ml-1">one-time</span>
+              {plan.featured && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="inline-block bg-accent text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    Most Popular
+                  </span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
+              )}
+
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                <p className="text-muted-foreground text-sm">{plan.description}</p>
+              </div>
+
+              {/* Price */}
+              <div className="mb-8">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-bold text-foreground">${plan.price.toLocaleString()}</span>
+                  <span className="text-muted-foreground">one-time</span>
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className="flex-1 mb-8">
+                <ul className="space-y-4">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      {feature}
+                    <li key={feature} className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                      <span className="text-foreground">{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <Button
-                  asChild
-                  className="w-full"
-                  variant={plan.popular ? 'default' : 'outline'}
-                >
-                  <Link href="/#contact">{plan.cta}</Link>
-                </Button>
-              </CardContent>
+              </div>
+
+              {/* CTA Button */}
+              <Button
+                asChild
+                size="lg"
+                variant={plan.featured ? 'default' : 'outline'}
+                className="w-full"
+              >
+                <Link href="/#contact">Get Started</Link>
+              </Button>
             </Card>
           ))}
         </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-8">
-          Not sure which plan fits? <Link href="/#contact" className="text-primary hover:underline">Book a free 15-min call</Link> and we&apos;ll help you decide.
-        </p>
+        {/* Bottom CTA */}
+        <div className="text-center">
+          <p className="text-muted-foreground">
+            Need a custom package?{' '}
+            <Link href="/#contact" className="text-accent font-semibold hover:underline">
+              Let's talk
+            </Link>
+          </p>
+        </div>
       </div>
     </section>
   )
