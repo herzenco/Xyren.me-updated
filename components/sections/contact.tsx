@@ -156,7 +156,6 @@ export function Contact() {
               </Button>
             </form>
           )}
-        </div>
       </div>
     </section>
   )
