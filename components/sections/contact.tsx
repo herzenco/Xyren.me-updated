@@ -49,23 +49,24 @@ export function Contact() {
   }
 
   return (
-    <section id="contact" className="py-20 md:py-28 bg-muted/30">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Let&apos;s build your website
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Tell us about your business and we&apos;ll get back to you within one business day.
-            </p>
-          </div>
+    <section id="contact" className="py-24 md:py-32 lg:py-40 bg-background">
+      <div className="mx-auto max-w-4xl px-6 md:px-8">
+        <div className="mx-auto max-w-2xl text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+            Ready to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">get started?</span>
+          </h2>
+          <p className="text-lg md:text-xl text-muted-foreground">
+            Tell us about your business and we&apos;ll get back to you within one business day.
+          </p>
+        </div>
 
           {submitted ? (
-            <div className="flex flex-col items-center gap-4 py-12 text-center">
-              <CheckCircle className="h-16 w-16 text-primary" />
-              <h3 className="text-xl font-semibold">Message received!</h3>
-              <p className="text-muted-foreground">
+            <div className="flex flex-col items-center gap-4 py-16 text-center">
+              <div style={{ background: 'linear-gradient(135deg, #0066ff 0%, #6366f1 100%)', padding: '2rem', borderRadius: '9999px' }}>
+                <CheckCircle className="h-12 w-12 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold">Message received!</h3>
+              <p className="text-muted-foreground text-lg">
                 We&apos;ll be in touch within one business day to discuss your project.
               </p>
               <Button variant="outline" onClick={() => setSubmitted(false)}>
@@ -120,12 +121,12 @@ export function Contact() {
                 <select
                   id="service"
                   {...register('service')}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="flex min-h-[44px] w-full rounded-md border border-border bg-background px-3 py-2 text-base transition-colors focus-visible:outline-none focus-visible:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600/20"
                 >
                   <option value="">Not sure yet</option>
-                  <option value="starter">Starter — $1,500</option>
-                  <option value="growth">Growth — $2,800</option>
-                  <option value="authority">Authority — $5,000</option>
+                  <option value="starter">Starter — $2,500</option>
+                  <option value="growth">Growth — $4,500</option>
+                  <option value="enterprise">Enterprise — $7,500</option>
                 </select>
               </div>
 
