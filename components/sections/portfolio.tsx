@@ -1,94 +1,125 @@
-import { Card } from '@/components/ui/card'
-import { TrendingUp } from 'lucide-react'
+'use client'
 
-const caseStudies = [
+import Link from 'next/link'
+import { motion, type Variants } from 'framer-motion'
+import { ArrowRight, Building2, Home } from 'lucide-react'
+
+const industries = [
   {
-    industry: 'Home Services',
-    leads: 340,
-    qualified: 87,
-    growth: '+340%',
-    description: 'Plumbing & HVAC businesses',
+    id: 'professional-services',
+    title: 'Professional Services',
+    description: 'Consulting firms, legal practices, accounting, and B2B service providers.',
+    icon: Building2,
+    href: '/use-cases/professional-services',
   },
   {
-    industry: 'Professional Services',
-    leads: 215,
-    qualified: 92,
-    growth: '+220%',
-    description: 'Consulting & Legal',
-  },
-  {
-    industry: 'Trades & Contractors',
-    leads: 180,
-    qualified: 89,
-    growth: '+185%',
-    description: 'Electrical & Construction',
+    id: 'home-services',
+    title: 'Home Services',
+    description: 'Plumbing, HVAC, electrical, cleaning, landscaping, and home improvement.',
+    icon: Home,
+    href: '/use-cases/home-services',
   },
 ]
 
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
+}
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
+}
+
 export function Portfolio() {
   return (
-    <section id="portfolio" className="py-24 md:py-32 lg:py-40">
+    <section id="portfolio" className="bg-background py-24 md:py-32 lg:py-40">
       <div className="mx-auto max-w-6xl px-6 md:px-8">
         {/* Section header */}
-        <div className="mx-auto max-w-3xl text-center mb-20">
+        <motion.div
+          className="mx-auto max-w-3xl text-center mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-            Proven results.
+            Built for your <span className="text-gradient">industry.</span>
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-            Our customers are seeing real results with their Xyren sites. Here's what the data shows.
+            Whether you're in professional services or home services, we've built proven solutions for your business.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Case studies grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-16">
-          {caseStudies.map((study) => (
-            <Card key={study.industry} className="p-8 md:p-10 flex flex-col">
-              <div className="mb-8">
-                <p className="text-sm font-semibold text-accent uppercase tracking-wide mb-2">
-                  {study.industry}
-                </p>
-                <p className="text-muted-foreground text-sm">{study.description}</p>
-              </div>
+        {/* Industries grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          {industries.map((industry) => {
+            const Icon = industry.icon
+            return (
+              <motion.div key={industry.id} variants={cardVariants}>
+                <Link href={industry.href}>
+                  <motion.div
+                    className="group h-full rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-10 md:p-12 transition-all duration-300 cursor-pointer hover:border-primary/40"
+                    whileHover={{
+                      y: -8,
+                      boxShadow: '0 0 60px hsl(190 100% 50% / 0.15)',
+                    }}
+                  >
+                    {/* Icon */}
+                    <div className="mb-8">
+                      <motion.div
+                        className="inline-flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300"
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        <Icon className="h-8 w-8 text-primary" />
+                      </motion.div>
+                    </div>
 
-              <div className="flex-1 space-y-6">
-                {/* Leads metric */}
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Leads Captured</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-foreground">{study.leads}</span>
-                    <span className="text-sm text-muted-foreground">leads</span>
-                  </div>
-                </div>
+                    {/* Content */}
+                    <div className="mb-8 flex-1">
+                      <h3 className="text-2xl font-bold mb-3 text-foreground group-hover:text-gradient transition-all duration-300">
+                        {industry.title}
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {industry.description}
+                      </p>
+                    </div>
 
-                {/* Qualified metric */}
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Qualified</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-accent">{study.qualified}%</span>
-                    <span className="text-sm text-muted-foreground">scored high</span>
-                  </div>
-                </div>
-
-                {/* Growth metric */}
-                <div className="pt-4 border-t border-border">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-accent flex-shrink-0" />
-                    <span className="text-lg font-semibold text-foreground">{study.growth}</span>
-                    <span className="text-sm text-muted-foreground">vs. average</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Bottom note */}
-        <div className="bg-muted/30 rounded-lg p-8 md:p-10 text-center">
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            These are anonymized aggregate metrics from our customers' actual sites.
-            No customer data is shared publicly. Detailed reports available upon request.
-          </p>
-        </div>
+                    {/* CTA */}
+                    <motion.div
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
+                      whileHover={{ gap: '0.75rem' }}
+                    >
+                      <span>Learn more</span>
+                      <motion.div
+                        whileHover={{ x: 4 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </motion.div>
+                    </motion.div>
+                  </motion.div>
+                </Link>
+              </motion.div>
+            )
+          })}
+        </motion.div>
       </div>
     </section>
   )

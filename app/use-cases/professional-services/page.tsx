@@ -5,13 +5,23 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, ArrowRight } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { seoMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Websites for Professional Services',
-  description:
-    'Custom websites for lawyers, accountants, consultants, and other professional service providers. Built to establish authority and generate qualified leads.',
+  title: seoMetadata.useCaseProfessionalServices.title,
+  description: seoMetadata.useCaseProfessionalServices.description,
   alternates: {
     canonical: `${siteConfig.url}/use-cases/professional-services`,
+  },
+  openGraph: {
+    title: seoMetadata.useCaseProfessionalServices.title,
+    description: seoMetadata.useCaseProfessionalServices.description,
+    images: [seoMetadata.useCaseProfessionalServices.image],
+  },
+  twitter: {
+    title: seoMetadata.useCaseProfessionalServices.title,
+    description: seoMetadata.useCaseProfessionalServices.description,
+    images: [seoMetadata.useCaseProfessionalServices.image],
   },
 }
 

@@ -5,13 +5,23 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, ArrowRight, Phone, Star, MapPin, Clock } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { seoMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Websites for Home Services Businesses',
-  description:
-    'Custom websites for plumbers, electricians, HVAC, landscapers, and other home service providers. Built for local SEO and phone call conversions.',
+  title: seoMetadata.useCaseHomeServices.title,
+  description: seoMetadata.useCaseHomeServices.description,
   alternates: {
     canonical: `${siteConfig.url}/use-cases/home-services`,
+  },
+  openGraph: {
+    title: seoMetadata.useCaseHomeServices.title,
+    description: seoMetadata.useCaseHomeServices.description,
+    images: [seoMetadata.useCaseHomeServices.image],
+  },
+  twitter: {
+    title: seoMetadata.useCaseHomeServices.title,
+    description: seoMetadata.useCaseHomeServices.description,
+    images: [seoMetadata.useCaseHomeServices.image],
   },
 }
 

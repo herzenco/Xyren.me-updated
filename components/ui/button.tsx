@@ -9,7 +9,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:scale-[1.02] active:scale-95",
+        default: "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:scale-[1.02] active:scale-95 shadow-glow",
+        hero: "bg-gradient-primary text-primary-foreground shadow-glow hover:shadow-[0_0_80px_hsl(190_100%_50%_/_0.4)] hover:scale-[1.02] active:scale-95",
+        "hero-outline": "border-2 border-border bg-transparent text-foreground hover:bg-card hover:border-primary/50 active:scale-95",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
@@ -24,6 +26,7 @@ const buttonVariants = cva(
         sm: "min-h-[44px] px-3 py-2 text-sm has-[>svg]:px-2.5",
         default: "min-h-[48px] px-4 py-2.5 has-[>svg]:px-3",
         lg: "min-h-[52px] px-6 py-3 text-base has-[>svg]:px-4",
+        xl: "min-h-[56px] px-8 py-3 text-lg has-[>svg]:px-6",
         icon: "size-10",
         "icon-sm": "size-8",
         "icon-lg": "size-12",

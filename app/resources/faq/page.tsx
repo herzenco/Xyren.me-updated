@@ -6,13 +6,23 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { siteConfig } from '@/lib/config'
+import { seoMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'FAQ — Frequently Asked Questions',
-  description:
-    'Answers to the most common questions about building a website with Xyren.me. Pricing, timelines, process, and more.',
+  title: seoMetadata.faq.title,
+  description: seoMetadata.faq.description,
   alternates: {
     canonical: `${siteConfig.url}/resources/faq`,
+  },
+  openGraph: {
+    title: seoMetadata.faq.title,
+    description: seoMetadata.faq.description,
+    images: [seoMetadata.faq.image],
+  },
+  twitter: {
+    title: seoMetadata.faq.title,
+    description: seoMetadata.faq.description,
+    images: [seoMetadata.faq.image],
   },
 }
 
@@ -28,6 +38,10 @@ const faqCategories = [
         q: 'What do I need to provide?',
         a: 'Your logo, any photos of your work or team (or we can source stock images), a description of your services, your contact details, and any specific requirements. We\'ll guide you through everything with a simple checklist.',
       },
+      {
+        q: 'How long does the project take?',
+        a: 'Most projects take 2–4 weeks from kickoff to launch, depending on complexity and how quickly you provide content. Rush timelines are available for an additional fee.',
+      },
     ],
   },
   {
@@ -41,6 +55,10 @@ const faqCategories = [
         q: 'Do you offer payment plans?',
         a: 'Yes. We typically split projects into 50% upfront and 50% on launch. For larger projects, we can discuss a 3-part payment schedule.',
       },
+      {
+        q: 'What\'s included in the base price?',
+        a: 'Responsive design, core pages (home, services, about, contact), basic SEO setup, mobile optimization, and up to 2 rounds of revisions. Add-ons like blog setup, appointment booking, or advanced integrations are quoted separately.',
+      },
     ],
   },
   {
@@ -53,6 +71,14 @@ const faqCategories = [
       {
         q: 'Can I update the website myself after launch?',
         a: 'Yes. For content like blog posts and FAQs, we set up a simple admin panel. For design changes, you\'d need a developer — or you can hire us for ongoing support.',
+      },
+      {
+        q: 'Is my website mobile-friendly?',
+        a: 'Yes. All our websites are built mobile-first and fully responsive. They look great on phones, tablets, and desktops.',
+      },
+      {
+        q: 'Does my website have SEO built in?',
+        a: 'Yes. We implement technical SEO best practices including meta tags, structured data, fast page load times, and mobile optimization. For content SEO like keyword strategy, we offer that as an optional service.',
       },
     ],
   },

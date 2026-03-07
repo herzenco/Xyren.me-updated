@@ -4,13 +4,23 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { BookOpen, Lightbulb, HelpCircle, ArrowRight } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { seoMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Resources — Website Tips for Service Professionals',
-  description:
-    'Guides, blog posts, and FAQs to help service professionals get more from their website. Free resources from the Xyren.me team.',
+  title: seoMetadata.resources.title,
+  description: seoMetadata.resources.description,
   alternates: {
     canonical: `${siteConfig.url}/resources`,
+  },
+  openGraph: {
+    title: seoMetadata.resources.title,
+    description: seoMetadata.resources.description,
+    images: [seoMetadata.resources.image],
+  },
+  twitter: {
+    title: seoMetadata.resources.title,
+    description: seoMetadata.resources.description,
+    images: [seoMetadata.resources.image],
   },
 }
 

@@ -1,3 +1,6 @@
+'use client'
+
+import { motion, type Variants } from 'framer-motion'
 import {
   Accordion,
   AccordionContent,
@@ -32,31 +35,70 @@ const faqs = [
   },
 ]
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+}
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5 },
+  },
+}
+
 export function FAQ() {
   return (
-    <section id="faq" className="py-24 md:py-32 lg:py-40 bg-muted/50">
+    <section id="faq" className="bg-background py-24 md:py-32 lg:py-40">
       <div className="mx-auto max-w-4xl px-6 md:px-8">
-        <div className="mx-auto max-w-3xl text-center mb-20">
+        <motion.div
+          className="mx-auto max-w-3xl text-center mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
-            Questions? We've got <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">answers.</span>
+            Questions? We've got <span className="text-gradient">answers.</span>
           </h2>
           <p className="text-lg text-muted-foreground">
             Everything you need to know to get started.
           </p>
-        </div>
+        </motion.div>
 
-        <Accordion type="single" collapsible className="space-y-3">
-          {faqs.map((faq, i) => (
-            <AccordionItem key={i} value={`item-${i}`} className="border border-border rounded-lg px-6 data-[state=open]:bg-muted/30">
-              <AccordionTrigger className="text-left font-semibold text-lg hover:no-underline py-5">
-                {faq.q}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-4 leading-relaxed text-base">
-                {faq.a}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="space-y-3"
+        >
+          <Accordion type="single" collapsible className="space-y-3">
+            {faqs.map((faq, i) => (
+              <motion.div key={i} variants={itemVariants}>
+                <AccordionItem
+                  value={`item-${i}`}
+                  className="border border-border/50 rounded-xl px-6 bg-card/50 backdrop-blur-sm data-[state=open]:border-primary/30 data-[state=open]:bg-card/80 transition-all duration-200"
+                >
+                  <AccordionTrigger className="text-left font-semibold text-lg hover:no-underline py-5 hover:text-primary transition-colors">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4 leading-relaxed text-base">
+                    {faq.a}
+                  </AccordionContent>
+                </AccordionItem>
+              </motion.div>
+            ))}
+          </Accordion>
+        </motion.div>
       </div>
     </section>
   )

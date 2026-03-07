@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -49,22 +50,45 @@ export function Contact() {
   }
 
   return (
-    <section id="contact" className="py-24 md:py-32 lg:py-40 bg-background">
-      <div className="mx-auto max-w-4xl px-6 md:px-8">
-        <div className="mx-auto max-w-2xl text-center mb-16">
+    <section id="contact" className="relative py-24 md:py-32 lg:py-40 bg-background overflow-hidden">
+      {/* Bottom glow blob */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+
+      <div className="mx-auto max-w-4xl px-6 md:px-8 relative z-10">
+        <motion.div
+          className="mx-auto max-w-2xl text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
-            Ready to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">get started?</span>
+            Ready to <span className="text-gradient">get started?</span>
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground">
             Tell us about your business and we&apos;ll get back to you within one business day.
           </p>
-        </div>
+        </motion.div>
 
+        <motion.div
+          className="mx-auto max-w-2xl"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           {submitted ? (
             <div className="flex flex-col items-center gap-4 py-16 text-center">
-              <div style={{ background: 'linear-gradient(135deg, #0066ff 0%, #6366f1 100%)', padding: '2rem', borderRadius: '9999px' }}>
-                <CheckCircle className="h-12 w-12 text-white" />
-              </div>
+              <motion.div
+                className="inline-flex"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+              >
+                <div className="p-6 rounded-full bg-gradient-primary shadow-glow">
+                  <CheckCircle className="h-12 w-12 text-primary-foreground" />
+                </div>
+              </motion.div>
               <h3 className="text-2xl font-bold">Message received!</h3>
               <p className="text-muted-foreground text-lg">
                 We&apos;ll be in touch within one business day to discuss your project.
@@ -74,7 +98,7 @@ export function Contact() {
               </Button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 bg-card/30 rounded-lg p-8 md:p-10 border border-border/30 backdrop-blur-sm">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="name">Full Name *</Label>
@@ -121,7 +145,7 @@ export function Contact() {
                 <select
                   id="service"
                   {...register('service')}
-                  className="flex min-h-[44px] w-full rounded-md border border-border bg-background px-3 py-2 text-base transition-colors focus-visible:outline-none focus-visible:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600/20"
+                  className="flex min-h-[44px] w-full rounded-md border border-border bg-card px-3 py-2 text-base transition-colors focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                 >
                   <option value="">Not sure yet</option>
                   <option value="starter">Starter — $2,500</option>
@@ -144,7 +168,7 @@ export function Contact() {
                 )}
               </div>
 
-              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" size="lg" variant="hero" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -156,6 +180,7 @@ export function Contact() {
               </Button>
             </form>
           )}
+        </motion.div>
       </div>
     </section>
   )

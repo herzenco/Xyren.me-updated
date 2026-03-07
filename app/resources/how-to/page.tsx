@@ -4,13 +4,23 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Clock, ArrowRight } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { seoMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'How-To Guides — Website & Marketing for Service Professionals',
-  description:
-    'Step-by-step guides to help service business owners improve their website, SEO, and online lead generation.',
+  title: seoMetadata.howTo.title,
+  description: seoMetadata.howTo.description,
   alternates: {
     canonical: `${siteConfig.url}/resources/how-to`,
+  },
+  openGraph: {
+    title: seoMetadata.howTo.title,
+    description: seoMetadata.howTo.description,
+    images: [seoMetadata.howTo.image],
+  },
+  twitter: {
+    title: seoMetadata.howTo.title,
+    description: seoMetadata.howTo.description,
+    images: [seoMetadata.howTo.image],
   },
 }
 
@@ -35,6 +45,20 @@ const guides = [
     excerpt: 'Step-by-step guide to integrating Cal.com or Calendly into your service business website.',
     reading_time: 6,
     difficulty: 'beginner' as const,
+  },
+  {
+    title: 'How to Create a Winning Service Portfolio Showcase',
+    slug: 'create-service-portfolio',
+    excerpt: 'Display your best work with a portfolio section that gets more customers to call.',
+    reading_time: 9,
+    difficulty: 'intermediate' as const,
+  },
+  {
+    title: 'How to Optimize Your Website for Local Search',
+    slug: 'optimize-local-search',
+    excerpt: 'Advanced techniques for dominating your local search market and beating competitors.',
+    reading_time: 15,
+    difficulty: 'advanced' as const,
   },
 ]
 

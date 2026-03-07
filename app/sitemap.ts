@@ -5,18 +5,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = siteConfig.url
 
   const staticRoutes = [
-    '',
-    '/use-cases/professional-services',
-    '/use-cases/home-services',
-    '/resources',
-    '/resources/blog',
-    '/resources/how-to',
-    '/resources/faq',
+    { path: '', priority: 1.0, frequency: 'weekly' as const },
+    { path: '/use-cases/professional-services', priority: 0.8, frequency: 'monthly' as const },
+    { path: '/use-cases/home-services', priority: 0.8, frequency: 'monthly' as const },
+    { path: '/resources', priority: 0.8, frequency: 'monthly' as const },
+    { path: '/resources/blog', priority: 0.8, frequency: 'weekly' as const },
+    { path: '/resources/how-to', priority: 0.8, frequency: 'monthly' as const },
+    { path: '/resources/faq', priority: 0.8, frequency: 'monthly' as const },
   ].map((route) => ({
-    url: `${baseUrl}${route}`,
+    url: `${baseUrl}${route.path}`,
     lastModified: new Date(),
-    changeFrequency: 'monthly' as const,
-    priority: route === '' ? 1 : 0.8,
+    changeFrequency: route.frequency,
+    priority: route.priority,
   }))
 
   return staticRoutes

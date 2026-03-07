@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Separator } from '@/components/ui/separator'
 
 const footerLinks = {
@@ -28,9 +29,21 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="space-y-3">
-            <Link href="/" className="font-bold text-xl">
-              <span className="text-primary">Xyren</span>
-              <span className="text-muted-foreground">.me</span>
+            <Link href="/">
+              <Image
+                src="/logos/xyren-logo-blue.png"
+                alt="Xyren"
+                width={90}
+                height={28}
+                className="block dark:hidden"
+              />
+              <Image
+                src="/logos/xyren-logo-dark.png"
+                alt="Xyren"
+                width={90}
+                height={28}
+                className="hidden dark:block"
+              />
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Custom websites for service professionals. Built fast, optimized for leads.

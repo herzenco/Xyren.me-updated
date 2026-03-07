@@ -4,13 +4,23 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Clock } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { seoMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Blog — Website & Marketing Tips for Service Professionals',
-  description:
-    'Articles on local SEO, lead generation, website design, and online marketing for service-based businesses.',
+  title: seoMetadata.blog.title,
+  description: seoMetadata.blog.description,
   alternates: {
     canonical: `${siteConfig.url}/resources/blog`,
+  },
+  openGraph: {
+    title: seoMetadata.blog.title,
+    description: seoMetadata.blog.description,
+    images: [seoMetadata.blog.image],
+  },
+  twitter: {
+    title: seoMetadata.blog.title,
+    description: seoMetadata.blog.description,
+    images: [seoMetadata.blog.image],
   },
 }
 
@@ -39,6 +49,22 @@ const placeholderPosts = [
     excerpt: 'A simple system for consistently collecting reviews that actually convert new customers.',
     published_at: '2025-01-05',
     reading_time: 7,
+  },
+  {
+    title: 'Website Design Trends for Service Businesses in 2025',
+    slug: 'website-design-trends-2025',
+    category: 'design',
+    excerpt: 'Modern design elements that build trust and encourage clients to get in touch.',
+    published_at: '2024-12-28',
+    reading_time: 8,
+  },
+  {
+    title: 'The Complete Business Guide to Online Reputation Management',
+    slug: 'online-reputation-management-guide',
+    category: 'business',
+    excerpt: 'Monitor, manage, and improve how your business appears online — and why it matters.',
+    published_at: '2024-12-20',
+    reading_time: 10,
   },
 ]
 

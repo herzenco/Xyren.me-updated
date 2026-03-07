@@ -1,5 +1,7 @@
+'use client'
+
 import { Target, BarChart3, Zap, Lock } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import { motion, type Variants } from 'framer-motion'
 
 const values = [
   {
@@ -28,31 +30,68 @@ const values = [
   },
 ]
 
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+}
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
+}
+
 export function HowWeThink() {
   return (
-    <section className="bg-muted/50 py-24 md:py-32 lg:py-40">
+    <section className="bg-background py-24 md:py-32 lg:py-40">
       <div className="mx-auto max-w-6xl px-6 md:px-8">
         {/* Section header */}
-        <div className="mx-auto max-w-3xl text-center mb-20">
+        <motion.div
+          className="mx-auto max-w-3xl text-center mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-            Built <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">differently.</span>
+            Most websites look fine.{' '}
+            <span className="text-gradient">They just don't do anything.</span>
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-            Most web agencies build nice-looking sites that don't convert. We focus on results —
-            powerful lead tracking, AI scoring, and real-time analytics built in from day one.
+            We focus on results — powerful lead tracking, AI scoring, and real-time analytics built in from day one.
           </p>
-        </div>
+        </motion.div>
 
         {/* Values grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           {values.map((value) => {
             const Icon = value.icon
             return (
-              <Card key={value.title} className="p-8 md:p-10">
+              <motion.div
+                key={value.title}
+                variants={itemVariants}
+                whileHover={{ y: -4, borderColor: 'hsl(190 100% 50% / 0.4)' }}
+                className="p-8 md:p-10 rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300"
+              >
                 <div className="flex items-start gap-6">
                   <div className="flex-shrink-0">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10">
-                      <Icon className="h-6 w-6 text-accent" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                      <Icon className="h-6 w-6 text-primary" />
                     </div>
                   </div>
                   <div className="flex-1">
@@ -64,10 +103,10 @@ export function HowWeThink() {
                     </p>
                   </div>
                 </div>
-              </Card>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   )
