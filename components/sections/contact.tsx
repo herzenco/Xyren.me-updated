@@ -30,7 +30,7 @@ export function Contact() {
             className="cta-glow inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3.5 text-lg font-semibold transition-all"
           >
             Start your project plan
-            <ArrowRight className="h-5 w-5" />
+            <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </Link>
         </div>
 
@@ -44,9 +44,9 @@ export function Contact() {
             href="https://wa.me/message"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors"
+            className="inline-flex items-center gap-1.5 text-whatsapp hover:text-whatsapp/80 transition-colors"
           >
-            <MessageCircle className="h-4 w-4" />
+            <MessageCircle className="h-4 w-4" aria-hidden="true" />
             WhatsApp
           </a>
         </div>
