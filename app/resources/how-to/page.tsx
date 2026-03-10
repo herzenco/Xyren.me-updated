@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Clock, ArrowRight } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'How-To Guides — Website & Marketing for Service Professionals',
@@ -14,29 +15,20 @@ export const metadata: Metadata = {
   },
 }
 
-const guides = [
-  {
-    title: 'How to Set Up Google Business Profile for Your Service Business',
-    slug: 'setup-google-business-profile',
-    excerpt: 'A complete walkthrough for creating and optimising your Google Business Profile to appear in local search results.',
-    reading_time: 8,
-    difficulty: 'beginner' as const,
-  },
-  {
-    title: 'How to Write Service Page Content That Ranks and Converts',
-    slug: 'write-service-page-content',
-    excerpt: 'The exact formula for writing service pages that rank on Google and turn readers into customers.',
-    reading_time: 10,
-    difficulty: 'intermediate' as const,
-  },
-  {
-    title: 'How to Set Up Appointment Booking on Your Website',
-    slug: 'setup-appointment-booking',
-    excerpt: 'Step-by-step guide to integrating Cal.com or Calendly into your service business website.',
-    reading_time: 6,
-    difficulty: 'beginner' as const,
-  },
-]
+async function getGuides() {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('guides')
+    .select('*')
+    .order('published_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching guides:', error)
+    return []
+  }
+
+  return data
+}
 
 const difficultyColors = {
   beginner: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -44,7 +36,9 @@ const difficultyColors = {
   advanced: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 }
 
-export default function HowToPage() {
+export default async function HowToPage() {
+  const guides = await getGuides()
+
   return (
     <div className="py-20 md:py-28">
       <div className="container mx-auto px-4">
@@ -55,31 +49,40 @@ export default function HowToPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {guides.map((guide) => (
-            <Link key={guide.slug} href={`/resources/how-to/${guide.slug}`} className="group">
-              <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all">
-                <CardContent className="p-6 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${difficultyColors[guide.difficulty]}`}>
-                      {guide.difficulty}
+        {guides.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No guides found. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+            {guides.map((guide) => (
+              <Link key={guide.slug} href={`/resources/how-to/${guide.slug}`} className="group">
+                <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all">
+                  <CardContent className="p-6 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${difficultyColors[guide.difficulty as keyof typeof difficultyColors]
+                          }`}
+                      >
+                        {guide.difficulty}
+                      </span>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {guide.reading_time} min
+                      </span>
+                    </div>
+                    <h2 className="font-bold leading-snug group-hover:text-primary transition-colors">
+                      {guide.title}
+                    </h2>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{guide.excerpt}</p>
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
+                      Read guide <ArrowRight className="h-4 w-4" />
                     </span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> {guide.reading_time} min
-                    </span>
-                  </div>
-                  <h2 className="font-bold leading-snug group-hover:text-primary transition-colors">
-                    {guide.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">{guide.excerpt}</p>
-                  <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
-                    Read guide <ArrowRight className="h-4 w-4" />
-                  </span>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

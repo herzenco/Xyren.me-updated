@@ -68,7 +68,7 @@ export function Portfolio() {
               >
                 <div>
                   <div className="icon-container mb-6">
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">{useCase.title}</h3>
                   <p className="text-sm text-foreground/80 mb-4">
@@ -84,7 +84,7 @@ export function Portfolio() {
                     className="cta-glow inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold"
                   >
                     Learn More
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </Link>
                 </div>
               </motion.div>

@@ -49,7 +49,7 @@ export function Hero() {
               className="cta-glow inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3.5 text-lg font-semibold transition-all"
             >
               Get a website that works
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
             </Link>
           </motion.div>
         </div>

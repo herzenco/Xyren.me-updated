@@ -40,3 +40,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+xyren-489814-521c78488890.json
+client_secret_*.json

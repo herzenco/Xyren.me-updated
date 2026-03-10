@@ -1,8 +1,7 @@
 'use client'
 
 import { Calendar, MessageSquare, Users, BarChart3 } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
+import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import {
   floatUp,
@@ -87,7 +86,7 @@ export function Tools() {
                   initial="hidden"
                   animate={isInView ? 'visible' : 'hidden'}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5" aria-hidden="true" />
                 </motion.div>
                 <h3 className="mt-5 text-lg font-semibold">{tool.name}</h3>
                 <motion.p

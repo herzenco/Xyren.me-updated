@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const contactSchema = z.object({
   name: z.string().min(2),
@@ -15,20 +16,24 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const data = contactSchema.parse(body)
 
-    // TODO: Send email via Resend or store in Supabase
-    // Example with Resend:
-    // const { Resend } = await import('resend')
-    // const resend = new Resend(process.env.RESEND_API_KEY)
-    // await resend.emails.send({
-    //   from: 'Contact Form <noreply@xyren.me>',
-    //   to: process.env.CONTACT_EMAIL!,
-    //   subject: `New enquiry from ${data.name}`,
-    //   text: `Name: ${data.name}\nEmail: ${data.email}\nMessage: ${data.message}`,
-    // })
+    // Store in Supabase
+    const supabase = createAdminClient()
+    const { error } = await (supabase.from('contact_submissions') as any).insert({
+      name: data.name,
+      email: data.email,
+      phone: data.phone || null,
+      business: data.business || null,
+      service: data.service || null,
+      message: data.message,
+      status: 'new',
+    })
 
-    console.log('Contact form submission:', data)
+    if (error) {
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Failed to save submission' }, { status: 500 })
+    }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, message: 'Thank you! We\'ll get back to you soon.' })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Invalid form data', details: error.issues }, { status: 400 })

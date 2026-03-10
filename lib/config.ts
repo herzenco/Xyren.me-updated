@@ -11,6 +11,17 @@ export const siteConfig = {
   contact: {
     email: 'hello@xyren.me',
   },
+  keywords: [
+    'custom web design',
+    'service business websites',
+    'SEO for tradespeople',
+    'lead generation websites',
+    'productized web design',
+    'local SEO',
+    'conversion optimized websites',
+    'Xyren',
+    'Herzen Co',
+  ],
 } as const
 
 export type SiteConfig = typeof siteConfig

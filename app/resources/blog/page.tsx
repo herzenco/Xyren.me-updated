@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Clock } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Blog — Website & Marketing Tips for Service Professionals',
@@ -14,37 +15,26 @@ export const metadata: Metadata = {
   },
 }
 
-// Placeholder posts — replace with Supabase fetch
-const placeholderPosts = [
-  {
-    title: '7 Reasons Your Service Business Website Isn\'t Getting Calls',
-    slug: '7-reasons-website-not-getting-calls',
-    category: 'seo',
-    excerpt: 'Most service business websites make the same mistakes. Here\'s what to fix first.',
-    published_at: '2025-01-15',
-    reading_time: 6,
-  },
-  {
-    title: 'Local SEO in 2025: A Complete Guide for Tradespeople',
-    slug: 'local-seo-guide-tradespeople-2025',
-    category: 'seo',
-    excerpt: 'Everything you need to know about ranking in Google Maps and local search results.',
-    published_at: '2025-01-10',
-    reading_time: 12,
-  },
-  {
-    title: 'How to Get More 5-Star Google Reviews (Without Begging)',
-    slug: 'get-more-google-reviews',
-    category: 'marketing',
-    excerpt: 'A simple system for consistently collecting reviews that actually convert new customers.',
-    published_at: '2025-01-05',
-    reading_time: 7,
-  },
-]
+async function getPosts() {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .order('published_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching blog posts:', error)
+    return []
+  }
+
+  return data
+}
 
 const categories = ['All', 'SEO', 'Marketing', 'Design', 'Business']
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const posts = await getPosts()
+
   return (
     <div className="py-20 md:py-28">
       <div className="container mx-auto px-4">
@@ -73,38 +63,50 @@ export default function BlogPage() {
         </div>
 
         {/* Posts grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {placeholderPosts.map((post) => (
-            <Link
-              key={post.slug}
-              href={`/resources/blog/${post.category}/${post.slug}`}
-              className="group"
-            >
-              <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all">
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5" />
-                <CardContent className="p-5 space-y-3">
-                  <Badge variant="secondary" className="text-xs capitalize">
-                    {post.category}
-                  </Badge>
-                  <h2 className="font-bold leading-snug group-hover:text-primary transition-colors">
-                    {post.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                    <span>{new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {post.reading_time} min read
+        {posts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No blog posts found. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+            {posts.map((post) => (
+              <Link
+                key={post.slug}
+                href={`/resources/blog/${post.category}/${post.slug}`}
+                className="group"
+              >
+                <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all">
+                  <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5" />
+                  <CardContent className="p-5 space-y-3">
+                    <Badge variant="secondary" className="text-xs capitalize">
+                      {post.category}
+                    </Badge>
+                    <h2 className="font-bold leading-snug group-hover:text-primary transition-colors">
+                      {post.title}
+                    </h2>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+                      <span>
+                        {new Date(post.published_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {post.reading_time} min read
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-primary group-hover:gap-2 transition-all">
+                      Read more <ArrowRight className="h-3 w-3" />
                     </span>
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-primary group-hover:gap-2 transition-all">
-                    Read more <ArrowRight className="h-3 w-3" />
-                  </span>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

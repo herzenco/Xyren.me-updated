@@ -141,6 +141,7 @@ export function Pricing() {
                             ? 'text-primary'
                             : 'text-muted-foreground'
                         )}
+                        aria-hidden="true"
                       />
                       <span className="text-foreground/80">{feature}</span>
                     </li>
@@ -160,7 +161,7 @@ export function Pricing() {
                   )}
                 >
                   Get started
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
                 <Link
                   href="/#contact"
