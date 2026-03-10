@@ -1,120 +1,180 @@
+'use client'
+
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { CheckCircle } from 'lucide-react'
+import { Check, ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import { useRef } from 'react'
+import { cn } from '@/lib/utils'
+import { floatUp, containerVariants } from '@/lib/animations'
 
 const plans = [
   {
-    name: 'Starter',
-    price: '$1,500',
-    description: 'Perfect for getting online fast with a professional presence.',
+    tier: 'FOUNDATION',
+    name: 'Core System',
+    description: 'A reliable website system that runs without babysitting.',
+    price: '$150',
     features: [
-      'Up to 5 pages',
-      'Mobile-responsive design',
-      'Contact form',
-      'Basic SEO setup',
-      'Google Analytics',
-      '2 rounds of revisions',
-      '5-day turnaround',
+      'Secure hosting and uptime monitoring',
+      'Ongoing maintenance and updates',
+      'Conversion-focused site structure',
+      'Contact forms and basic scheduling',
     ],
-    cta: 'Get Started',
     popular: false,
   },
   {
-    name: 'Growth',
-    price: '$2,800',
-    description: 'The complete package for businesses serious about lead generation.',
+    tier: 'AUTOMATION',
+    name: 'Active System',
+    description:
+      'A system that captures leads and books meetings automatically.',
+    price: '$300',
     features: [
-      'Up to 10 pages',
-      'Online appointment booking',
-      'Lead capture forms',
-      'Full SEO optimization',
-      'Blog setup (5 posts)',
-      'Google Reviews integration',
-      'Chat widget',
-      '3 rounds of revisions',
-      '7-day turnaround',
+      'Everything in Core',
+      'AI chat for lead capture and qualification',
+      'Automated responses (no manual follow-up)',
+      'Scheduling and CRM integration',
     ],
-    cta: 'Get Started',
     popular: true,
   },
   {
-    name: 'Authority',
-    price: '$5,000',
-    description: 'For established businesses that want to dominate their local market.',
+    tier: 'PERFORMANCE',
+    name: 'Optimized System',
+    description:
+      'A performance-focused system for businesses that want visibility and refinement over time.',
+    price: '$450',
     features: [
-      'Unlimited pages',
-      'Custom booking system',
-      'Advanced lead funnels',
-      'Full content strategy',
-      'Blog setup (15 posts)',
-      'Schema markup',
-      'Performance optimization',
-      'Admin dashboard',
-      'Unlimited revisions',
-      '10-day turnaround',
+      'Everything in Active',
+      'Ongoing performance monitoring',
+      'Periodic system optimization',
+      'Priority support',
     ],
-    cta: 'Get Started',
     popular: false,
   },
 ]
 
 export function Pricing() {
+  const sectionRef = useRef(null)
+  const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
+
   return (
-    <section id="pricing" className="py-20 md:py-28 bg-muted/30">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Simple, transparent pricing
+    <section ref={sectionRef} id="pricing" className="py-24 md:py-32">
+      <div className="container mx-auto px-6">
+        {/* Heading */}
+        <div className="mx-auto max-w-3xl text-center mb-6">
+          <h2 className="text-4xl font-bold tracking-[-0.03em] sm:text-5xl md:text-[56px] leading-[1.1]">
+            Three levels of{' '}
+            <span className="text-gradient">system maturity</span>
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            One-time project fee. No hidden costs. No recurring agency retainers.
+        </div>
+
+        <p className="mx-auto max-w-xl text-center text-lg text-muted-foreground leading-relaxed mb-10">
+          More capability. More automation. More leverage.
+        </p>
+
+        {/* Setup badge */}
+        <div className="mx-auto mb-14 w-fit rounded-xl border border-border bg-card px-8 py-4 text-center">
+          <p className="text-lg font-semibold">$2,000 one-time setup</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Strategy, design, build, configuration, and launch.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 items-start">
+        {/* Cards */}
+        <motion.div
+          className="grid grid-cols-1 gap-6 md:grid-cols-3 items-start max-w-5xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
           {plans.map((plan) => (
-            <Card
+            <motion.div
               key={plan.name}
-              className={`relative ${plan.popular ? 'border-primary shadow-lg scale-[1.02]' : ''}`}
-            >
-              {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  Most Popular
-                </Badge>
+              className={cn(
+                'relative rounded-2xl border bg-card flex flex-col',
+                plan.popular ? 'border-primary shadow-glow' : 'border-border'
               )}
-              <CardHeader className="pb-4 pt-8">
-                <h3 className="text-xl font-bold">{plan.name}</h3>
-                <div className="mt-2">
-                  <span className="text-4xl font-extrabold">{plan.price}</span>
-                  <span className="text-muted-foreground ml-1">one-time</span>
+              variants={floatUp}
+            >
+              {/* Most Popular badge */}
+              {plan.popular && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <span className="rounded-full border border-primary bg-background px-4 py-1 text-xs font-semibold text-primary">
+                    Most Popular
+                  </span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
+              )}
+
+              {/* Header */}
+              <div className="p-6 pb-0">
+                <p
+                  className={cn(
+                    'text-xs font-semibold uppercase tracking-widest mb-3',
+                    plan.popular ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                >
+                  {plan.tier}
+                </p>
+                <h3 className="text-xl font-bold">{plan.name}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  {plan.description}
+                </p>
+                <div className="mt-5">
+                  <span className="text-4xl font-bold">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground ml-1">
+                    /month
+                  </span>
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className="p-6 flex-1">
+                <ul className="space-y-3">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      {feature}
+                    <li
+                      key={feature}
+                      className="flex items-start gap-3 text-sm"
+                    >
+                      <Check
+                        className={cn(
+                          'h-4 w-4 shrink-0 mt-0.5',
+                          plan.popular
+                            ? 'text-primary'
+                            : 'text-muted-foreground'
+                        )}
+                      />
+                      <span className="text-foreground/80">{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <Button
-                  asChild
-                  className="w-full"
-                  variant={plan.popular ? 'default' : 'outline'}
-                >
-                  <Link href="/#contact">{plan.cta}</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-8">
-          Not sure which plan fits? <Link href="/#contact" className="text-primary hover:underline">Book a free 15-min call</Link> and we&apos;ll help you decide.
+              {/* Footer */}
+              <div className="p-6 pt-0 space-y-3">
+                <Link
+                  href="/#contact"
+                  className={cn(
+                    'flex items-center justify-center gap-2 w-full h-11 rounded-lg text-sm font-semibold transition-all',
+                    plan.popular
+                      ? 'cta-glow'
+                      : 'border border-border text-foreground/80 hover:border-foreground/30 hover:text-foreground'
+                  )}
+                >
+                  Get started
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/#contact"
+                  className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Learn more
+                </Link>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <p className="text-center text-sm text-muted-foreground mt-10">
+          No long-term contracts. Cancel anytime.
         </p>
       </div>
     </section>
