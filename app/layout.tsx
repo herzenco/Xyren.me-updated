@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { ChatWidget } from '@/components/layout/chat-widget'
+import { JsonLd } from '@/components/seo/json-ld'
 import { siteConfig } from '@/lib/config'
 import './globals.css'
 
@@ -25,6 +26,9 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  keywords: [...siteConfig.keywords],
+  authors: [{ name: 'Herzen Co.' }],
+  creator: 'Herzen Co.',
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -32,13 +36,14 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     siteName: siteConfig.name,
-    images: [{ url: siteConfig.ogImage, width: 1200, height: 630 }],
+    images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: siteConfig.name }],
   },
   twitter: {
     card: 'summary_large_image',
     title: siteConfig.name,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
+    creator: '@xyrenme',
   },
   robots: {
     index: true,
@@ -81,6 +86,7 @@ export default function RootLayout({
         <Footer />
         <ChatWidget />
         <Analytics />
+        <JsonLd />
         {/* Google Tag Manager Script */}
         <Script
           id="gtm-script"
