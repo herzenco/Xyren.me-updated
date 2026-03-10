@@ -2,7 +2,7 @@
 
 import { Calendar, MessageSquare, Users, BarChart3 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useInView } from 'framer-motion'
+import { useInView } from 'react-intersection-observer'
 import { useRef } from 'react'
 import {
   floatUp,
