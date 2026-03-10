@@ -102,7 +102,7 @@ export function Tools() {
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <Icon className="h-6 w-6 text-primary" />
+                      <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
                     </motion.div>
                   </div>
                   <h3 className="text-xl font-semibold mb-3 text-foreground">

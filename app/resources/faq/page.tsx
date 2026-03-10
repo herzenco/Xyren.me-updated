@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/accordion'
 import { siteConfig } from '@/lib/config'
 import { seoMetadata } from '@/lib/seo'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: seoMetadata.faq.title,
@@ -26,65 +27,27 @@ export const metadata: Metadata = {
   },
 }
 
-const faqCategories = [
-  {
-    category: 'Process',
-    items: [
-      {
-        q: 'What does the process look like from start to finish?',
-        a: 'After you fill out our contact form, we schedule a 15-minute discovery call. From there, you\'ll receive a project brief and scope document. Once approved, we\'ll request your content (logo, photos, copy) and begin building. You\'ll receive a staging link to review within 5–7 days, and after 2 rounds of revisions, we launch.',
-      },
-      {
-        q: 'What do I need to provide?',
-        a: 'Your logo, any photos of your work or team (or we can source stock images), a description of your services, your contact details, and any specific requirements. We\'ll guide you through everything with a simple checklist.',
-      },
-      {
-        q: 'How long does the project take?',
-        a: 'Most projects take 2–4 weeks from kickoff to launch, depending on complexity and how quickly you provide content. Rush timelines are available for an additional fee.',
-      },
-    ],
-  },
-  {
-    category: 'Pricing',
-    items: [
-      {
-        q: 'Are there any ongoing fees?',
-        a: 'The project fee is a one-time payment. You\'ll have ongoing costs for hosting (typically $20–$30/month with Vercel or similar) and your domain (about $15/year). We offer optional monthly support packages but these are not required.',
-      },
-      {
-        q: 'Do you offer payment plans?',
-        a: 'Yes. We typically split projects into 50% upfront and 50% on launch. For larger projects, we can discuss a 3-part payment schedule.',
-      },
-      {
-        q: 'What\'s included in the base price?',
-        a: 'Responsive design, core pages (home, services, about, contact), basic SEO setup, mobile optimization, and up to 2 rounds of revisions. Add-ons like blog setup, appointment booking, or advanced integrations are quoted separately.',
-      },
-    ],
-  },
-  {
-    category: 'Technical',
-    items: [
-      {
-        q: 'Who hosts the website?',
-        a: 'We build on Next.js and deploy to Vercel by default — it\'s the fastest, most reliable platform for Next.js. You\'ll have your own Vercel account and full access to the deployment.',
-      },
-      {
-        q: 'Can I update the website myself after launch?',
-        a: 'Yes. For content like blog posts and FAQs, we set up a simple admin panel. For design changes, you\'d need a developer — or you can hire us for ongoing support.',
-      },
-      {
-        q: 'Is my website mobile-friendly?',
-        a: 'Yes. All our websites are built mobile-first and fully responsive. They look great on phones, tablets, and desktops.',
-      },
-      {
-        q: 'Does my website have SEO built in?',
-        a: 'Yes. We implement technical SEO best practices including meta tags, structured data, fast page load times, and mobile optimization. For content SEO like keyword strategy, we offer that as an optional service.',
-      },
-    ],
-  },
-]
+export default async function FAQPage() {
+  const supabase = await createClient()
 
-export default function FAQPage() {
+  // Fetch published FAQs from Supabase
+  const { data: faqs, error } = await (supabase.from('faq_items') as any)
+    .select('*')
+    .eq('is_published', true)
+    .order('sort_order', { ascending: true })
+
+  // Group FAQs by category
+  const groupedFaqs = (faqs || []).reduce((acc: any, item: any) => {
+    const existing = acc.find((group: any) => group.category === item.category)
+    if (existing) {
+      existing.items.push({ q: item.question, a: item.answer })
+    } else {
+      acc.push({ category: item.category, items: [{ q: item.question, a: item.answer }] })
+    }
+    return acc
+  }, [])
+
+  const faqCategories = groupedFaqs.length > 0 ? groupedFaqs : []
   return (
     <div className="py-20 md:py-28">
       <div className="container mx-auto px-4">
@@ -97,27 +60,33 @@ export default function FAQPage() {
           </div>
 
           <div className="space-y-10">
-            {faqCategories.map((section) => (
-              <div key={section.category}>
-                <h2 className="text-xl font-bold mb-4">{section.category}</h2>
-                <Accordion type="single" collapsible className="space-y-2">
-                  {section.items.map((item, i) => (
-                    <AccordionItem
-                      key={i}
-                      value={`${section.category}-${i}`}
-                      className="border rounded-lg px-4"
-                    >
-                      <AccordionTrigger className="text-left font-medium hover:no-underline py-4">
-                        {item.q}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground pb-4 leading-relaxed">
-                        {item.a}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+            {faqCategories.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No FAQs available yet. Check back soon!</p>
               </div>
-            ))}
+            ) : (
+              faqCategories.map((section: any) => (
+                <div key={section.category}>
+                  <h2 className="text-xl font-bold mb-4">{section.category}</h2>
+                  <Accordion type="single" collapsible className="space-y-2">
+                    {section.items.map((item: any, i: number) => (
+                      <AccordionItem
+                        key={i}
+                        value={`${section.category}-${i}`}
+                        className="border rounded-lg px-4"
+                      >
+                        <AccordionTrigger className="text-left font-medium hover:no-underline py-4">
+                          {item.q}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground pb-4 leading-relaxed">
+                          {item.a}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

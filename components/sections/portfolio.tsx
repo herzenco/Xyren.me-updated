@@ -87,7 +87,7 @@ export function Portfolio() {
                         className="inline-flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300"
                         whileHover={{ scale: 1.1 }}
                       >
-                        <Icon className="h-8 w-8 text-primary" />
+                        <Icon className="h-8 w-8 text-primary" aria-hidden="true" />
                       </motion.div>
                     </div>
 
@@ -111,7 +111,7 @@ export function Portfolio() {
                         whileHover={{ x: 4 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <ArrowRight className="h-4 w-4" />
+                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
                       </motion.div>
                     </motion.div>
                   </motion.div>

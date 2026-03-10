@@ -156,6 +156,7 @@ export function Pricing() {
                           className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
                             plan.featured ? 'text-primary' : 'text-muted-foreground'
                           }`}
+                          aria-hidden="true"
                         />
                         <span className="text-foreground">{feature}</span>
                       </motion.li>

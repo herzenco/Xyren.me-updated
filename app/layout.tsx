@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { ThemeProvider } from '@/components/layout/theme-provider'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
+import { JsonLd } from '@/components/seo/json-ld'
 import { siteConfig } from '@/lib/config'
 import { seoMetadata } from '@/lib/seo'
 import './globals.css'
@@ -55,6 +56,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <JsonLd />
+      </head>
       <body className={`${plusJakartaSans.variable} antialiased dark`}>
         <ThemeProvider>
           <a

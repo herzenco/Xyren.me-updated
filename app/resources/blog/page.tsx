@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Clock } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
 import { seoMetadata } from '@/lib/seo'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: seoMetadata.blog.title,
@@ -24,53 +25,25 @@ export const metadata: Metadata = {
   },
 }
 
-// Placeholder posts — replace with Supabase fetch
-const placeholderPosts = [
-  {
-    title: '7 Reasons Your Service Business Website Isn\'t Getting Calls',
-    slug: '7-reasons-website-not-getting-calls',
-    category: 'seo',
-    excerpt: 'Most service business websites make the same mistakes. Here\'s what to fix first.',
-    published_at: '2025-01-15',
-    reading_time: 6,
-  },
-  {
-    title: 'Local SEO in 2025: A Complete Guide for Tradespeople',
-    slug: 'local-seo-guide-tradespeople-2025',
-    category: 'seo',
-    excerpt: 'Everything you need to know about ranking in Google Maps and local search results.',
-    published_at: '2025-01-10',
-    reading_time: 12,
-  },
-  {
-    title: 'How to Get More 5-Star Google Reviews (Without Begging)',
-    slug: 'get-more-google-reviews',
-    category: 'marketing',
-    excerpt: 'A simple system for consistently collecting reviews that actually convert new customers.',
-    published_at: '2025-01-05',
-    reading_time: 7,
-  },
-  {
-    title: 'Website Design Trends for Service Businesses in 2025',
-    slug: 'website-design-trends-2025',
-    category: 'design',
-    excerpt: 'Modern design elements that build trust and encourage clients to get in touch.',
-    published_at: '2024-12-28',
-    reading_time: 8,
-  },
-  {
-    title: 'The Complete Business Guide to Online Reputation Management',
-    slug: 'online-reputation-management-guide',
-    category: 'business',
-    excerpt: 'Monitor, manage, and improve how your business appears online — and why it matters.',
-    published_at: '2024-12-20',
-    reading_time: 10,
-  },
-]
+export default async function BlogPage() {
+  const supabase = await createClient()
 
-const categories = ['All', 'SEO', 'Marketing', 'Design', 'Business']
+  // Fetch published posts from Supabase
+  const { data: posts, error } = await (supabase.from('blog_posts') as any)
+    .select('*')
+    .eq('is_published', true)
+    .order('published_at', { ascending: false })
 
-export default function BlogPage() {
+  const displayPosts = posts || []
+  const uniqueCategories: string[] = Array.from(
+    new Set(
+      displayPosts.map((p: any) => {
+        const cat = p.category as string
+        return cat.charAt(0).toUpperCase() + cat.slice(1)
+      })
+    )
+  ) as string[]
+  const categories: string[] = ['All', ...uniqueCategories]
   return (
     <div className="py-20 md:py-28">
       <div className="container mx-auto px-4">
@@ -100,36 +73,42 @@ export default function BlogPage() {
 
         {/* Posts grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {placeholderPosts.map((post) => (
-            <Link
-              key={post.slug}
-              href={`/resources/blog/${post.category}/${post.slug}`}
-              className="group"
-            >
-              <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all">
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5" />
-                <CardContent className="p-5 space-y-3">
-                  <Badge variant="secondary" className="text-xs capitalize">
-                    {post.category}
-                  </Badge>
-                  <h2 className="font-bold leading-snug group-hover:text-primary transition-colors">
-                    {post.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                    <span>{new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {post.reading_time} min read
+          {displayPosts.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-muted-foreground">No posts published yet. Check back soon!</p>
+            </div>
+          ) : (
+            displayPosts.map((post: any) => (
+              <Link
+                key={post.slug}
+                href={`/resources/blog/${post.category}/${post.slug}`}
+                className="group"
+              >
+                <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all">
+                  <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5" />
+                  <CardContent className="p-5 space-y-3">
+                    <Badge variant="secondary" className="text-xs capitalize">
+                      {post.category}
+                    </Badge>
+                    <h2 className="font-bold leading-snug group-hover:text-primary transition-colors">
+                      {post.title}
+                    </h2>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+                      <span>{new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" aria-hidden="true" />
+                        {post.reading_time} min read
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-primary group-hover:gap-2 transition-all">
+                      Read more <ArrowRight className="h-3 w-3" aria-hidden="true" />
                     </span>
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-primary group-hover:gap-2 transition-all">
-                    Read more <ArrowRight className="h-3 w-3" />
-                  </span>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                  </CardContent>
+                </Card>
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </div>

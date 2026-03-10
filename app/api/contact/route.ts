@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { Resend } from 'resend'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const contactSchema = z.object({
   name: z.string().min(2),
@@ -15,18 +17,47 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const data = contactSchema.parse(body)
 
-    // TODO: Send email via Resend or store in Supabase
-    // Example with Resend:
-    // const { Resend } = await import('resend')
-    // const resend = new Resend(process.env.RESEND_API_KEY)
-    // await resend.emails.send({
-    //   from: 'Contact Form <noreply@xyren.me>',
-    //   to: process.env.CONTACT_EMAIL!,
-    //   subject: `New enquiry from ${data.name}`,
-    //   text: `Name: ${data.name}\nEmail: ${data.email}\nMessage: ${data.message}`,
-    // })
+    // Save to Supabase
+    const supabase = createAdminClient()
+    const { error: dbError } = await (supabase.from('contact_submissions') as any).insert({
+      name: data.name,
+      email: data.email,
+      phone: data.phone || null,
+      business: data.business || null,
+      service: data.service || null,
+      message: data.message,
+      status: 'new',
+    })
 
-    console.log('Contact form submission:', data)
+    if (dbError) {
+      console.error('Error saving to Supabase:', dbError)
+      // Don't block the response if Supabase fails
+    }
+
+    // Send email via Resend
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    const contactEmail = process.env.CONTACT_EMAIL || 'hello@xyren.me'
+
+    try {
+      await resend.emails.send({
+        from: 'Contact Form <noreply@xyren.me>',
+        to: contactEmail,
+        subject: `New enquiry from ${data.name}`,
+        html: `
+          <h2>New Contact Form Submission</h2>
+          <p><strong>Name:</strong> ${data.name}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          ${data.phone ? `<p><strong>Phone:</strong> ${data.phone}</p>` : ''}
+          ${data.business ? `<p><strong>Business:</strong> ${data.business}</p>` : ''}
+          ${data.service ? `<p><strong>Service:</strong> ${data.service}</p>` : ''}
+          <p><strong>Message:</strong></p>
+          <p>${data.message.replace(/\n/g, '<br>')}</p>
+        `,
+      })
+    } catch (emailError) {
+      console.error('Error sending email via Resend:', emailError)
+      return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

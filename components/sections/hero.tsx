@@ -57,7 +57,7 @@ export function Hero() {
           <Button asChild size="xl" variant="hero">
             <Link href="/#contact">
               Get a website that works
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
             </Link>
           </Button>
           <Button asChild size="xl" variant="hero-outline">
