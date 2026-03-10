@@ -1,22 +1,15 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ThemeToggle } from './theme-toggle'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
-  { label: 'Home', href: '/' },
-  {
-    label: 'Use Cases',
-    href: '#',
-    children: [
-      { label: 'Professional Services', href: '/use-cases/professional-services' },
-      { label: 'Home Services', href: '/use-cases/home-services' },
-    ],
-  },
+  { label: 'Industries', href: '/#portfolio' },
+  { label: 'Packages', href: '/#pricing' },
   {
     label: 'Resources',
     href: '#',
@@ -26,8 +19,6 @@ const navLinks = [
       { label: 'FAQ', href: '/resources/faq' },
     ],
   },
-  { label: 'Pricing', href: '/#pricing' },
-  { label: 'Contact', href: '/#contact' },
 ]
 
 export function Navbar() {
@@ -35,53 +26,58 @@ export function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-      <nav className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <nav className="container mx-auto flex h-[68px] items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <span className="text-primary">Xyren</span>
-          <span className="text-muted-foreground">.me</span>
+        <Link href="/" className="shrink-0">
+          <Image
+            src="/logos/xyren-logo-blue.png"
+            alt="Xyren by Herzen Co."
+            width={140}
+            height={40}
+            className="h-10 w-auto"
+            priority
+          />
         </Link>
 
         {/* Desktop Nav */}
-        <ul className="hidden md:flex items-center gap-1">
+        <ul className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <li key={link.label} className="relative group">
+            <li key={link.label} className="relative">
               {link.children ? (
-                <>
-                  <button
-                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                    onMouseEnter={() => setOpenDropdown(link.label)}
-                    onMouseLeave={() => setOpenDropdown(null)}
-                  >
+                <div
+                  onMouseEnter={() => setOpenDropdown(link.label)}
+                  onMouseLeave={() => setOpenDropdown(null)}
+                >
+                  <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                   <div
                     className={cn(
-                      'absolute top-full left-0 mt-1 w-52 rounded-md border bg-popover shadow-md transition-all',
-                      openDropdown === link.label ? 'opacity-100 visible' : 'opacity-0 invisible'
+                      'absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 rounded-xl border border-border bg-popover/95 backdrop-blur-xl shadow-lg transition-all duration-200',
+                      openDropdown === link.label
+                        ? 'opacity-100 visible translate-y-0'
+                        : 'opacity-0 invisible -translate-y-1'
                     )}
-                    onMouseEnter={() => setOpenDropdown(link.label)}
-                    onMouseLeave={() => setOpenDropdown(null)}
                   >
-                    {link.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
+                    <div className="p-1.5">
+                      {link.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className="block px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors"
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                </>
+                </div>
               ) : (
                 <Link
                   href={link.href}
-                  className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -90,44 +86,43 @@ export function Navbar() {
           ))}
         </ul>
 
-        {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-2">
-          <ThemeToggle />
-          <Button asChild size="sm">
-            <Link href="/#contact">Get a Free Quote</Link>
-          </Button>
-        </div>
-
         {/* Mobile menu button */}
-        <div className="flex md:hidden items-center gap-2">
-          <ThemeToggle />
+        <div className="flex md:hidden items-center">
           <Button
             variant="ghost"
             size="icon"
+            className="h-9 w-9"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <Menu className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </nav>
 
+      {/* Gradient line under navbar */}
+      <div className="section-separator" />
+
       {/* Mobile Nav */}
       {mobileOpen && (
-        <div className="md:hidden border-t bg-background">
-          <div className="container mx-auto px-4 py-4 flex flex-col gap-1">
+        <div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-xl">
+          <div className="container mx-auto px-6 py-6 flex flex-col gap-1">
             {navLinks.map((link) => (
               <div key={link.label}>
                 {link.children ? (
                   <>
-                    <p className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    <p className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                       {link.label}
                     </p>
                     {link.children.map((child) => (
                       <Link
                         key={child.href}
                         href={child.href}
-                        className="block px-6 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        className="block px-6 py-2.5 text-sm text-foreground/70 hover:text-foreground transition-colors"
                         onClick={() => setMobileOpen(false)}
                       >
                         {child.label}
@@ -137,7 +132,7 @@ export function Navbar() {
                 ) : (
                   <Link
                     href={link.href}
-                    className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    className="block px-3 py-2.5 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
                     {link.label}
@@ -145,13 +140,6 @@ export function Navbar() {
                 )}
               </div>
             ))}
-            <div className="pt-2 border-t mt-2">
-              <Button asChild className="w-full">
-                <Link href="/#contact" onClick={() => setMobileOpen(false)}>
-                  Get a Free Quote
-                </Link>
-              </Button>
-            </div>
           </div>
         </div>
       )}
