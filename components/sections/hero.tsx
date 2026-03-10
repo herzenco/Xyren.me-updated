@@ -1,54 +1,58 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ArrowRight, CheckCircle } from 'lucide-react'
+'use client'
 
-const highlights = [
-  '5–10 day turnaround',
-  'SEO-optimized by default',
-  'Mobile-first design',
-  'Lead capture built in',
-]
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useInView } from 'react-intersection-observer'
+import { floatUp, floatDown, floatRotate } from '@/lib/animations'
 
 export function Hero() {
+  const { ref, inView } = useInView({ threshold: 0.1, triggerOnce: true })
+
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted/30 py-20 md:py-32">
-      <div className="container mx-auto px-4 text-center">
-        <Badge variant="secondary" className="mb-6 text-sm">
-          🚀 Websites for service professionals
-        </Badge>
+    <section ref={ref} className="relative py-32 md:py-44 overflow-hidden">
+      {/* Cyan ambient glow */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-[800px] h-[500px] rounded-full bg-[radial-gradient(ellipse_at_center,_hsl(190_100%_50%/0.12)_0%,_transparent_70%)]" />
+      </div>
 
-        <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-          Your website should{' '}
-          <span className="text-primary">book clients</span>
-          {' '}while you sleep
-        </h1>
+      <div className="container relative mx-auto px-6 text-center">
+        <motion.h1
+          variants={floatUp}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+          className="mx-auto max-w-4xl text-5xl font-bold tracking-[-0.03em] sm:text-6xl md:text-[72px] leading-[1.05]"
+        >
+          Websites designed to{' '}
+          <br className="hidden sm:block" />
+          <span className="text-gradient">turn visitors into clients.</span>
+        </motion.h1>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-          Get a fast, professional website built specifically for your service business —
-          designed to capture leads and turn visitors into paying customers.
-          No more chasing. No more admin.
-        </p>
+        <motion.p
+          variants={floatDown}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+          className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl leading-relaxed"
+        >
+          We build conversion-focused websites for service professionals. Leads
+          captured, appointments booked. Launched in 5–10 days.
+        </motion.p>
 
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button asChild size="lg" className="text-base px-8">
-            <Link href="/#contact">
-              Get a Free Quote <ArrowRight className="ml-2 h-4 w-4" />
+        <div className="mt-12">
+          <motion.div
+            variants={floatRotate}
+            initial="hidden"
+            animate={inView ? 'visible' : 'hidden'}
+          >
+            <Link
+              href="/#contact"
+              className="cta-glow inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3.5 text-lg font-semibold transition-all"
+            >
+              Get a website that works
+              <ArrowRight className="h-5 w-5" />
             </Link>
-          </Button>
-          <Button asChild variant="outline" size="lg" className="text-base px-8">
-            <Link href="/#portfolio">See Our Work</Link>
-          </Button>
+          </motion.div>
         </div>
-
-        <ul className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-          {highlights.map((item) => (
-            <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CheckCircle className="h-4 w-4 text-primary shrink-0" />
-              {item}
-            </li>
-          ))}
-        </ul>
       </div>
     </section>
   )
