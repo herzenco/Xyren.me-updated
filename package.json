@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/plus-jakarta-sans": "^5.2.8",
     "@google-analytics/data": "^5.2.1",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-slot": "^1.2.4",
@@ -26,7 +27,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.2",
-    "react-intersection-observer": "^9.13.0",
+    "react-intersection-observer": "^9.16.0",
     "resend": "^6.9.3",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6"
