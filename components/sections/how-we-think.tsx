@@ -1,61 +1,91 @@
-import { Target, Zap, TrendingUp, Shield } from 'lucide-react'
+'use client'
+
+import { Zap, Target, Clock } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useInView } from 'react-intersection-observer'
+import { floatUp, floatDown, floatLeft, floatRight, containerVariants } from '@/lib/animations'
 
 const pillars = [
   {
-    icon: Target,
-    title: 'Built for Conversions',
-    description:
-      'Every element of your site is designed with one goal: turning visitors into booked appointments and paying customers.',
-  },
-  {
     icon: Zap,
-    title: 'Fast by Default',
-    description:
-      'We use modern technology to ensure your site loads instantly. Speed is an SEO ranking factor — and impatient visitors leave.',
+    title: 'Automation first',
+    description: "Websites shouldn't rely on human availability.",
   },
   {
-    icon: TrendingUp,
-    title: 'SEO From Day One',
-    description:
-      'Proper metadata, structured data, and content strategy baked in from the start so you rank without extra effort.',
+    icon: Target,
+    title: 'Conversion over decoration',
+    description: 'Design exists to drive action.',
   },
   {
-    icon: Shield,
-    title: 'No Lock-In',
-    description:
-      'You own everything. Code, content, domain. We build and hand it over — no recurring fees for things you already own.',
+    icon: Clock,
+    title: 'Built to run without babysitting',
+    description: 'Sites should work 24/7.',
   },
 ]
 
 export function HowWeThink() {
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  })
+
+  // Define animation variants for each card
+  const cardAnimations = [floatUp, floatDown, floatLeft, floatRight]
+
   return (
-    <section className="py-20 md:py-28">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            How we think about your website
+    <section className="py-24 md:py-32" ref={ref}>
+      <div className="container mx-auto px-6">
+        {/* Heading */}
+        <div className="mx-auto max-w-4xl text-center mb-6">
+          <h2 className="text-4xl font-bold tracking-[-0.03em] sm:text-5xl md:text-[56px] leading-[1.1]">
+            Most websites look fine.{' '}
+            <span className="text-gradient">
+              They just don&apos;t do anything.
+            </span>
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Most agency sites look good but don&apos;t convert. We fix that.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {pillars.map((pillar) => {
+        <p className="mx-auto max-w-2xl text-center text-lg text-muted-foreground leading-relaxed mb-20">
+          They collect form submissions, send you an email, and hope you follow
+          up in time. Meanwhile, leads go cold. We build sites that work
+          differently.
+        </p>
+
+        {/* Pillars */}
+        <motion.div
+          className="grid grid-cols-1 gap-12 sm:grid-cols-3 max-w-4xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+        >
+          {pillars.map((pillar, index) => {
             const Icon = pillar.icon
+            const animationVariant = cardAnimations[index % cardAnimations.length]
             return (
-              <div key={pillar.title} className="flex flex-col gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon className="h-6 w-6 text-primary" />
+              <motion.div
+                key={pillar.title}
+                className="flex flex-col items-center text-center gap-4"
+                variants={animationVariant}
+                initial="hidden"
+                animate={inView ? 'visible' : 'hidden'}
+              >
+                <div className="icon-container">
+                  <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold">{pillar.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {pillar.description}
                 </p>
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
+
+        {/* Bottom text */}
+        <p className="mx-auto mt-16 max-w-xl text-center text-sm text-muted-foreground">
+          This approach works best for service businesses that depend on leads
+          and bookings.
+        </p>
       </div>
     </section>
   )
