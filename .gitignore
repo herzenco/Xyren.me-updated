@@ -34,6 +34,18 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# credentials and secrets
+client_secret_*.json
+xyren-*.json
+
+# temporary/duplicate files
+" 2.tsx"
+" 2.ts"
+" 2/"
+" 3.tsx"
+" 3.ts"
+" 3/"
+
 # vercel
 .vercel
 
