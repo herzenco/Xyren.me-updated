@@ -140,6 +140,11 @@ export type Database = {
           service: string | null
           message: string
           status: 'new' | 'reviewed' | 'archived'
+          clickup_status: 'pending' | 'synced' | 'sync_failed'
+          clickup_task_id: string | null
+          clickup_error: string | null
+          synced_at: string | null
+          retry_count: number
           created_at: string
         }
         Insert: {
@@ -151,6 +156,11 @@ export type Database = {
           service?: string | null
           message: string
           status?: 'new' | 'reviewed' | 'archived'
+          clickup_status?: 'pending' | 'synced' | 'sync_failed'
+          clickup_task_id?: string | null
+          clickup_error?: string | null
+          synced_at?: string | null
+          retry_count?: number
           created_at?: string
         }
         Update: {
@@ -162,6 +172,11 @@ export type Database = {
           service?: string | null
           message?: string
           status?: 'new' | 'reviewed' | 'archived'
+          clickup_status?: 'pending' | 'synced' | 'sync_failed'
+          clickup_task_id?: string | null
+          clickup_error?: string | null
+          synced_at?: string | null
+          retry_count?: number
           created_at?: string
         }
       }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card } from '@/components/ui/card'
 
 interface SubmissionSyncStatusProps {
@@ -19,7 +19,15 @@ export function SubmissionSyncStatus({ submission, onRetry }: SubmissionSyncStat
   const [retryError, setRetryError] = useState<string | null>(null)
   const [retrySuccess, setRetrySuccess] = useState(false)
 
-  const handleRetry = async () => {
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      setRetrySuccess(false)
+      setRetryError(null)
+    }
+  }, [])
+
+  const handleRetry = useCallback(async () => {
     setIsRetrying(true)
     setRetryError(null)
     setRetrySuccess(false)
@@ -28,7 +36,9 @@ export function SubmissionSyncStatus({ submission, onRetry }: SubmissionSyncStat
       const result = await onRetry(submission.id)
       if (result.success) {
         setRetrySuccess(true)
-        setTimeout(() => setRetrySuccess(false), 3000)
+        // Auto-hide message after 3 seconds
+        const timeoutId = setTimeout(() => setRetrySuccess(false), 3000)
+        return () => clearTimeout(timeoutId)
       } else {
         setRetryError(result.error || 'Unknown error')
       }
@@ -37,7 +47,7 @@ export function SubmissionSyncStatus({ submission, onRetry }: SubmissionSyncStat
     } finally {
       setIsRetrying(false)
     }
-  }
+  }, [submission.id, onRetry])
 
   const status = submission.clickup_status || 'pending'
   const isFailed = status === 'sync_failed'

@@ -54,6 +54,13 @@ export async function updateSubmissionStatus(
 
 export async function retryClickUpSync(submissionId: string) {
   try {
+    // Auth check
+    const userClient = await createClient()
+    const { data: { user }, error: authError } = await userClient.auth.getUser()
+    if (authError || !user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
     const supabase = createAdminClient()
 
     // Fetch the submission
@@ -92,15 +99,39 @@ ${submission.message}`
           synced_at: new Date().toISOString(),
         })
         .eq('id', submissionId)
+        .eq('clickup_status', 'sync_failed')
 
       if (updateError) throw updateError
       revalidatePath(`/dashboard/submissions/${submissionId}`)
       return { success: true }
     } else {
+      // Persist error state
+      await (supabase
+        .from('contact_submissions') as any)
+        .update({
+          clickup_status: 'sync_failed',
+          clickup_error: syncResult.error,
+        })
+        .eq('id', submissionId)
+
       return { success: false, error: syncResult.error }
     }
   } catch (error) {
     console.error('Retry sync error:', error)
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+
+    // Persist error to database
+    try {
+      const supabase = createAdminClient()
+      await (supabase
+        .from('contact_submissions') as any)
+        .update({
+          clickup_status: 'sync_failed',
+          clickup_error: errorMsg,
+        })
+        .eq('id', submissionId)
+    } catch {}
+
+    return { success: false, error: errorMsg }
   }
 }
