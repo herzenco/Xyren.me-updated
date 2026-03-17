@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
       service: data.service || null,
       message: data.message,
       clickup_status: 'pending',
-      retry_count: 0,
     }).select()
 
     if (insertError || !insertedData?.[0]) {
@@ -63,12 +62,12 @@ export async function POST(request: NextRequest) {
 
     const submission = insertedData[0]
 
-    // Attempt ClickUp sync (don't await, but log result)
+    // Attempt ClickUp sync
     try {
       const syncResult = await syncToClickUp(submission)
 
       if (syncResult.success) {
-        // Update with successful sync
+        // Update with successful sync (only if still pending - prevents race condition)
         await (supabase.from('contact_submissions') as any)
           .update({
             clickup_status: 'synced',
@@ -76,14 +75,16 @@ export async function POST(request: NextRequest) {
             synced_at: new Date().toISOString(),
           })
           .eq('id', submission.id)
+          .eq('clickup_status', 'pending')
       } else {
-        // Mark as failed sync
+        // Mark as failed sync (only if still pending)
         await (supabase.from('contact_submissions') as any)
           .update({
             clickup_status: 'sync_failed',
             clickup_error: syncResult.error,
           })
           .eq('id', submission.id)
+          .eq('clickup_status', 'pending')
       }
     } catch (syncError) {
       console.error('ClickUp sync error:', syncError)
@@ -94,6 +95,7 @@ export async function POST(request: NextRequest) {
           clickup_error: syncError instanceof Error ? syncError.message : 'Unknown error',
         })
         .eq('id', submission.id)
+        .eq('clickup_status', 'pending')
     }
 
     return NextResponse.json({ success: true, message: 'Thank you! We\'ll get back to you soon.' })
