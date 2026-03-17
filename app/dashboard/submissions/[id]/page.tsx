@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/page-header'
-import { updateSubmissionStatus } from '@/lib/actions/submissions'
+import { updateSubmissionStatus, retryClickUpSync } from '@/lib/actions/submissions'
 import { Card } from '@/components/ui/card'
+import { SubmissionSyncStatus } from '@/components/dashboard/submission-sync-status'
 
 export default async function SubmissionDetailPage({
   params,
@@ -84,7 +85,12 @@ export default async function SubmissionDetailPage({
           </div>
         </div>
 
-        <div>
+        <div className="space-y-6">
+          <SubmissionSyncStatus
+            submission={submission}
+            onRetry={retryClickUpSync}
+          />
+
           <Card className="p-6">
             <h3 className="font-semibold mb-4">Update Status</h3>
             <form

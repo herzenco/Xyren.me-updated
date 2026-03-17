@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { clickupService } from '@/lib/clickup'
 import type { Database } from '@/types/database.types'
 
 type SubmissionUpdate = Database['public']['Tables']['contact_submissions']['Update']
@@ -47,5 +49,58 @@ export async function updateSubmissionStatus(
         ? err.message
         : 'Failed to update submission status'
     throw new Error(message)
+  }
+}
+
+export async function retryClickUpSync(submissionId: string) {
+  try {
+    const supabase = createAdminClient()
+
+    // Fetch the submission
+    const { data: submission, error: fetchError } = await (supabase
+      .from('contact_submissions') as any)
+      .select('*')
+      .eq('id', submissionId)
+      .single()
+
+    if (fetchError || !submission) {
+      return { success: false, error: 'Submission not found' }
+    }
+
+    // Attempt ClickUp sync
+    const taskDescription = `Name: ${submission.name}
+Email: ${submission.email}
+Phone: ${submission.phone || 'Not provided'}
+Business: ${submission.business || 'Not provided'}
+Service: ${submission.service || 'Not provided'}
+
+Message:
+${submission.message}`
+
+    const syncResult = await clickupService.createTask({
+      name: `[Contact] ${submission.business || submission.name}`,
+      description: taskDescription,
+    })
+
+    if (syncResult.success) {
+      // Update with successful sync
+      const { error: updateError } = await (supabase
+        .from('contact_submissions') as any)
+        .update({
+          clickup_status: 'synced',
+          clickup_task_id: syncResult.taskId,
+          synced_at: new Date().toISOString(),
+        })
+        .eq('id', submissionId)
+
+      if (updateError) throw updateError
+      revalidatePath(`/dashboard/submissions/${submissionId}`)
+      return { success: true }
+    } else {
+      return { success: false, error: syncResult.error }
+    }
+  } catch (error) {
+    console.error('Retry sync error:', error)
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
