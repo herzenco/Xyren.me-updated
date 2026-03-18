@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { clickupService } from '@/lib/clickup'
+import { sendContactConfirmation, sendContactNotification } from '@/lib/email'
 
 const contactSchema = z.object({
   name: z.string().min(2),
@@ -96,6 +97,23 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', submission.id)
         .eq('clickup_status', 'pending')
+    }
+
+    // Fire-and-forget email notifications (don't fail the request if email fails)
+    try {
+      await Promise.all([
+        sendContactConfirmation(data.email, data.name),
+        sendContactNotification({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          business: data.business,
+          service: data.service,
+          message: data.message,
+        }),
+      ])
+    } catch (emailError) {
+      console.error('Email notification error:', emailError)
     }
 
     return NextResponse.json({ success: true, message: 'Thank you! We\'ll get back to you soon.' })

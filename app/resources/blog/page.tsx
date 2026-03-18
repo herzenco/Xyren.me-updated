@@ -18,8 +18,9 @@ export const metadata: Metadata = {
 async function getPosts() {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from('posts')
+    .from('blog_posts')
     .select('*')
+    .eq('is_published', true)
     .order('published_at', { ascending: false })
 
   if (error) {
@@ -27,7 +28,7 @@ async function getPosts() {
     return []
   }
 
-  return data
+  return data ?? []
 }
 
 const categories = ['All', 'SEO', 'Marketing', 'Design', 'Business']
