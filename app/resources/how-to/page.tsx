@@ -18,8 +18,9 @@ export const metadata: Metadata = {
 async function getGuides() {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from('guides')
-    .select('*')
+    .from('how_to_guides')
+    .select('id, slug, title, excerpt, difficulty, reading_time, published_at')
+    .eq('is_published', true)
     .order('published_at', { ascending: false })
 
   if (error) {
@@ -27,7 +28,7 @@ async function getGuides() {
     return []
   }
 
-  return data
+  return data ?? []
 }
 
 const difficultyColors = {

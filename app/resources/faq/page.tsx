@@ -20,9 +20,10 @@ export const metadata: Metadata = {
 async function getFaqs() {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from('faqs')
-    .select('*')
-    .order('order', { ascending: true })
+    .from('faq_items')
+    .select('id, question, answer, category, sort_order')
+    .eq('is_published', true)
+    .order('sort_order', { ascending: true })
 
   if (error) {
     console.error('Error fetching FAQs:', error)
