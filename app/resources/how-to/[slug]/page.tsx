@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, Clock } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { MDXContent } from '@/components/mdx-content'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -105,9 +106,7 @@ export default async function HowToGuidePage({ params }: Props) {
 
           <Separator className="mb-8" />
 
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed">{guide.content}</pre>
-          </div>
+          <MDXContent source={guide.content} />
 
           <Separator className="my-12" />
 

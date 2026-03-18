@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, Clock, Calendar } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
 import { createClient } from '@/lib/supabase/server'
+import { MDXContent } from '@/components/mdx-content'
 
 type Props = { params: Promise<{ category: string; slug: string }> }
 
@@ -84,10 +85,7 @@ export default async function BlogPostPage({ params }: Props) {
 
           <Separator className="mb-8" />
 
-          {/* Content — replace with MDX renderer for rich content */}
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed">{post.content}</pre>
-          </div>
+          <MDXContent source={post.content} />
 
           <Separator className="my-12" />
 
