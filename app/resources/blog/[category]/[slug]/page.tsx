@@ -33,17 +33,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPost(category, slug)
   if (!post) return {}
 
+  const url = `${siteConfig.url}/resources/blog/${category}/${slug}`
+  const image = post.cover_image_url ?? `${siteConfig.url}${siteConfig.ogImage}`
+
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: {
-      canonical: `${siteConfig.url}/resources/blog/${category}/${slug}`,
-    },
+    alternates: { canonical: url },
     openGraph: {
       title: post.title,
-      description: post.excerpt,
+      description: post.excerpt ?? undefined,
       type: 'article',
-      publishedTime: post.published_at,
+      url,
+      publishedTime: post.published_at ?? undefined,
+      modifiedTime: post.updated_at ?? undefined,
+      authors: post.author ? [post.author] : undefined,
+      images: [{ url: image, width: 1200, height: 630, alt: post.title }],
     },
   }
 }
@@ -54,55 +59,81 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) notFound()
 
+  const postUrl = `${siteConfig.url}/resources/blog/${category}/${slug}`
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt,
+    url: postUrl,
+    datePublished: post.published_at,
+    dateModified: post.updated_at,
+    author: { '@type': 'Person', name: post.author ?? 'Xyren.me' },
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      logo: { '@type': 'ImageObject', url: `${siteConfig.url}${siteConfig.ogImage}` },
+    },
+    image: post.cover_image_url ?? `${siteConfig.url}${siteConfig.ogImage}`,
+    keywords: post.tags?.join(', '),
+    mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+  }
+
   return (
-    <div className="py-20 md:py-28">
-      <div className="container mx-auto px-4">
-        <article className="mx-auto max-w-2xl">
-          <Link
-            href={`/resources/blog/${category}`}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors capitalize"
-          >
-            <ArrowLeft className="h-4 w-4" /> {category} articles
-          </Link>
-
-          <Badge variant="secondary" className="mb-4 capitalize">{category}</Badge>
-
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl leading-tight mb-6">
-            {post.title}
-          </h1>
-
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
-              {new Date(post.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4" />
-              {post.reading_time} min read
-            </span>
-            <span>By {post.author}</span>
-          </div>
-
-          <Separator className="mb-8" />
-
-          <MDXContent source={post.content} />
-
-          <Separator className="my-12" />
-
-          <div className="rounded-xl bg-primary/5 border border-primary/20 p-6 text-center">
-            <h2 className="text-xl font-bold mb-2">Ready to fix your website?</h2>
-            <p className="text-muted-foreground mb-4 text-sm">
-              We build fast, SEO-optimized websites for service professionals in 5–10 days.
-            </p>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="py-20 md:py-28">
+        <div className="container mx-auto px-4">
+          <article className="mx-auto max-w-2xl">
             <Link
-              href="/#contact"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              href={`/resources/blog/${category}`}
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors capitalize"
             >
-              Get a Free Quote
+              <ArrowLeft className="h-4 w-4" /> {category} articles
             </Link>
-          </div>
-        </article>
+
+            <Badge variant="secondary" className="mb-4 capitalize">{category}</Badge>
+
+            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl leading-tight mb-6">
+              {post.title}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4" />
+                {new Date(post.published_at!).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4" />
+                {post.reading_time} min read
+              </span>
+              <span>By {post.author}</span>
+            </div>
+
+            <Separator className="mb-8" />
+
+            <MDXContent source={post.content ?? ''} />
+
+            <Separator className="my-12" />
+
+            <div className="rounded-xl bg-primary/5 border border-primary/20 p-6 text-center">
+              <h2 className="text-xl font-bold mb-2">Ready to fix your website?</h2>
+              <p className="text-muted-foreground mb-4 text-sm">
+                We build fast, SEO-optimized websites for service professionals in 5–10 days.
+              </p>
+              <Link
+                href="/#contact"
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Get a Free Quote
+              </Link>
+            </div>
+          </article>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
