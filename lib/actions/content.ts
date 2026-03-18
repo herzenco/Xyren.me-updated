@@ -1,10 +1,15 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { reviseContent } from '@/lib/content-engine/claude'
 
 export async function approveDraft(draftId: string) {
+  const authClient = await createClient()
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
   const supabase = createAdminClient()
 
   const { data: draft, error } = await (supabase as any)
@@ -63,6 +68,10 @@ export async function approveDraft(draftId: string) {
 }
 
 export async function rejectDraft(draftId: string) {
+  const authClient = await createClient()
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
   const supabase = createAdminClient()
   await (supabase as any)
     .from('content_drafts')
@@ -72,6 +81,10 @@ export async function rejectDraft(draftId: string) {
 }
 
 export async function requestDraftChanges(draftId: string, changes: string) {
+  const authClient = await createClient()
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
   if (!changes.trim()) return
 
   const supabase = createAdminClient()
