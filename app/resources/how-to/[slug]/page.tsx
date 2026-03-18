@@ -34,7 +34,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!guide) return {}
 
   const url = `${siteConfig.url}/resources/how-to/${slug}`
-  const image = guide.cover_image ?? `${siteConfig.url}${siteConfig.ogImage}`
+  const image = guide.cover_image
+    ?? `${siteConfig.url}/og?title=${encodeURIComponent(guide.title)}&type=How-To+Guide`
 
   return {
     title: guide.title,
@@ -64,7 +65,8 @@ export default async function HowToGuidePage({ params }: Props) {
     name: guide.title,
     description: guide.excerpt,
     url: guideUrl,
-    image: guide.cover_image ?? `${siteConfig.url}${siteConfig.ogImage}`,
+    image: guide.cover_image
+      ?? `${siteConfig.url}/og?title=${encodeURIComponent(guide.title)}&type=How-To+Guide`,
     estimatedCost: { '@type': 'MonetaryAmount', currency: 'USD', value: '0' },
     totalTime: guide.reading_time ? `PT${guide.reading_time}M` : undefined,
     publisher: {

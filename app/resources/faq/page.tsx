@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     description: 'Answers to the most common questions about building a website with Xyren.me.',
     type: 'website',
     url: faqUrl,
-    images: [{ url: `${siteConfig.url}${siteConfig.ogImage}`, width: 1200, height: 630 }],
+    images: [{ url: `${siteConfig.url}/og?title=Frequently+Asked+Questions`, width: 1200, height: 630 }],
   },
 }
 

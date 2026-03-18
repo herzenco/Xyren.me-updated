@@ -34,7 +34,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {}
 
   const url = `${siteConfig.url}/resources/blog/${category}/${slug}`
-  const image = post.cover_image_url ?? `${siteConfig.url}${siteConfig.ogImage}`
+  const image = post.cover_image_url
+    ?? `${siteConfig.url}/og?title=${encodeURIComponent(post.title)}&type=Blog`
 
   return {
     title: post.title,
@@ -74,7 +75,8 @@ export default async function BlogPostPage({ params }: Props) {
       name: siteConfig.name,
       logo: { '@type': 'ImageObject', url: `${siteConfig.url}${siteConfig.ogImage}` },
     },
-    image: post.cover_image_url ?? `${siteConfig.url}${siteConfig.ogImage}`,
+    image: post.cover_image_url
+      ?? `${siteConfig.url}/og?title=${encodeURIComponent(post.title)}&type=Blog`,
     keywords: post.tags?.join(', '),
     mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
   }

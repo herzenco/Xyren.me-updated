@@ -4,7 +4,7 @@ export const siteConfig = {
   description:
     'Get a fast, SEO-optimized website built for your service business in 5–10 days. No more chasing leads — let your website do the work.',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://xyren.me',
-  ogImage: '/og-image.png',
+  ogImage: '/og',
   links: {
     twitter: 'https://twitter.com/xyrenme',
   },
