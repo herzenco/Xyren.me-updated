@@ -141,9 +141,11 @@ export async function selectTopic(context: string): Promise<TopicDecision> {
         role: 'user',
         content: `You are an expert content strategist for a web design and digital marketing agency targeting service-based small businesses.
 
+<site_context>
 ${context}
+</site_context>
 
-Select the best content topic to publish today. Avoid any topic already covered in the existing content listed above. Pick topics with real search demand that service business owners would actively search for.
+Select the best content topic to publish today. Avoid any topic already covered in the existing content listed in <site_context>. Pick topics with real search demand that service business owners would actively search for.
 
 Respond with ONLY valid JSON (no markdown fences, no explanation):
 {
@@ -161,7 +163,13 @@ Respond with ONLY valid JSON (no markdown fences, no explanation):
   })
 
   const text = response.content[0].type === 'text' ? response.content[0].text : ''
-  return JSON.parse(text) as TopicDecision
+  let parsed: TopicDecision
+  try {
+    parsed = JSON.parse(text) as TopicDecision
+  } catch {
+    throw new Error(`selectTopic: Claude returned non-JSON response: ${text.slice(0, 300)}`)
+  }
+  return parsed
 }
 
 export async function generateContent(
@@ -175,24 +183,32 @@ export async function generateContent(
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',
-    max_tokens: 4096,
+    max_tokens: 8192,
     messages: [
       {
         role: 'user',
-        content: `You are an expert content writer for a web design and digital marketing agency targeting service-based small businesses (plumbers, electricians, cleaners, landscapers, etc.).
+        content: `You are an expert content writer for a web design and digital marketing agency targeting service-based small businesses.
 
-Write a complete ${topic.type === 'how-to' ? 'how-to guide' : 'blog post'} for:
+Write a complete ${topic.type === 'how-to' ? 'how-to guide' : 'blog post'}.
+
+<topic_details>
 Title: ${topic.title}
+Type: ${topic.type}
+Category: ${topic.category}
 Target keyword: ${topic.target_keyword}
 Secondary keywords: ${topic.secondary_keywords.join(', ')}
+Reasoning: ${topic.reasoning}
+</topic_details>
+
+<site_context>
+${existingTitles}
+</site_context>
 
 REQUIREMENTS:
 - Write in MDX format using # for H1, ## for H2, ### for H3, **bold**, *italic*, lists, etc.
 - Blog posts: 800–1200 words. How-to guides: 1000–1500 words.
 - Include the target keyword naturally in the first paragraph, at least 2 H2 headings, and the conclusion
-- Add internal links where relevant using markdown: [anchor text](/resources/blog/category/slug)
-- Known existing content for internal linking:
-${existingTitles}
+- Add internal links where relevant to content listed in <site_context>
 - End with a clear CTA linking to /#contact or /#pricing
 - Write for a non-technical small business owner — clear, practical, actionable
 
@@ -221,7 +237,12 @@ Respond with ONLY valid JSON (no markdown fences):
   })
 
   const text = response.content[0].type === 'text' ? response.content[0].text : ''
-  const parsed = JSON.parse(text) as GeneratedContent
+  let parsed: GeneratedContent
+  try {
+    parsed = JSON.parse(text) as GeneratedContent
+  } catch {
+    throw new Error(`generateContent: Claude returned non-JSON response: ${text.slice(0, 300)}`)
+  }
 
   // Calculate reading time from word count
   const wordCount = parsed.content.split(/\s+/).length
@@ -269,7 +290,12 @@ Respond with ONLY valid JSON:
   })
 
   const text = response.content[0].type === 'text' ? response.content[0].text : '{}'
-  const review = JSON.parse(text)
+  let review: { seo_score?: number; readability_score?: number }
+  try {
+    review = JSON.parse(text)
+  } catch {
+    review = {}
+  }
 
   return {
     ...content,
@@ -292,11 +318,13 @@ export async function reviseContent(
 
 TITLE: ${draft.title}
 
-CURRENT CONTENT:
+<current_content>
 ${draft.content}
+</current_content>
 
-REQUESTED CHANGES:
-${requestedChanges}
+<requested_changes>
+${requestedChanges.slice(0, 2000)}
+</requested_changes>
 
 Return ONLY the revised MDX content string. No JSON wrapper. No explanation.`,
       },
