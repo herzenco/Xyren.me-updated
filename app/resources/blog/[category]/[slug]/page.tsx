@@ -5,63 +5,22 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, Clock, Calendar } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
+import { createClient } from '@/lib/supabase/server'
 
 type Props = { params: Promise<{ category: string; slug: string }> }
 
-// In production, fetch from Supabase
 async function getPost(category: string, slug: string) {
-  const posts: Record<string, Record<string, { title: string; excerpt: string; content: string; published_at: string; reading_time: number; author: string }>> = {
-    seo: {
-      '7-reasons-website-not-getting-calls': {
-        title: '7 Reasons Your Service Business Website Isn\'t Getting Calls',
-        excerpt: 'Most service business websites make the same mistakes. Here\'s what to fix first.',
-        content: `
-# 7 Reasons Your Service Business Website Isn't Getting Calls
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('category', category)
+    .eq('is_published', true)
+    .single()
 
-Your website is live. You've told your customers about it. But the phone isn't ringing. Sound familiar?
-
-Most service business websites share the same handful of problems. The good news: they're all fixable.
-
-## 1. Your phone number is hard to find
-
-On mobile, your phone number should be at the very top of every page — ideally as a tap-to-call button. If someone has to scroll to find it, you've already lost them.
-
-## 2. Your site loads too slowly
-
-Google penalizes slow sites in rankings, and visitors leave if a page takes more than 3 seconds to load. Image compression and proper hosting go a long way.
-
-## 3. You're not ranking locally
-
-If you're not showing up in Google Maps or the top 3 local results, most of your potential customers will never find you organically.
-
-## 4. There's no clear call to action
-
-Every page needs to tell visitors exactly what to do next: Call now, Book online, Get a free quote. Don't make them guess.
-
-## 5. Your reviews aren't visible
-
-93% of people read reviews before hiring a local service provider. If your 5-star reviews are buried on Google, put them front and center on your site.
-
-## 6. You're not mobile-optimized
-
-Over 70% of local searches happen on mobile. A site that looks broken on a phone is worse than no site.
-
-## 7. Your content doesn't answer questions
-
-Google rewards content that answers the questions your customers are actually searching for. Service pages that just list your offerings aren't enough.
-
----
-
-*Ready to fix all of these at once? [Get a free quote →](/)*
-        `.trim(),
-        published_at: '2025-01-15',
-        reading_time: 6,
-        author: 'Xyren.me Team',
-      },
-    },
-  }
-
-  return posts[category]?.[slug] ?? null
+  if (error || !data) return null
+  return data
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
