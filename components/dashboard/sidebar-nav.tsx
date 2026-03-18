@@ -9,6 +9,7 @@ import {
   Mail,
   BarChart3,
   Users,
+  LayoutList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +18,11 @@ const navItems = [
     label: 'Overview',
     href: '/dashboard',
     icon: BarChart3,
+  },
+  {
+    label: 'Content',
+    href: '/dashboard/content',
+    icon: LayoutList,
   },
   {
     label: 'Blog',
