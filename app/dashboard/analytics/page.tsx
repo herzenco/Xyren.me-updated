@@ -6,6 +6,7 @@ import {
   getTrafficSource,
   getDeviceBreakdown,
   getGeographicData,
+  isGa4Configured,
 } from '@/lib/ga4'
 import { Users, Eye, TrendingUp, BarChart3, Globe, Smartphone } from 'lucide-react'
 
@@ -27,6 +28,27 @@ interface PageProps {
 }
 
 export default async function AnalyticsPage({ searchParams }: PageProps) {
+  if (!isGa4Configured()) {
+    return (
+      <>
+        <PageHeader title="Analytics" />
+        <div className="mt-12 rounded-xl border border-dashed border-border p-12 text-center">
+          <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold mb-2">GA4 not configured</h2>
+          <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-4">
+            Add the following environment variables to connect Google Analytics 4:
+          </p>
+          <pre className="inline-block text-left bg-secondary rounded-lg px-6 py-4 text-xs text-muted-foreground">
+{`NEXT_PUBLIC_GA4_PROPERTY_ID=
+GA4_CLIENT_EMAIL=
+GA4_PRIVATE_KEY=
+GA4_PROJECT_ID=          # optional`}
+          </pre>
+        </div>
+      </>
+    )
+  }
+
   const params = await searchParams
   const rangeParam = params.range || '7'
   const selectedRange = parseInt(rangeParam)
