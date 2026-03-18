@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { cache } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 
 type Props = { params: Promise<{ category: string; slug: string }> }
 
-async function getPost(category: string, slug: string) {
+const getPost = cache(async (category: string, slug: string) => {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('blog_posts')
@@ -19,9 +20,12 @@ async function getPost(category: string, slug: string) {
     .eq('is_published', true)
     .single()
 
-  if (error || !data) return null
+  if (error) {
+    if (error.code !== 'PGRST116') console.error('Error fetching blog post:', error)
+    return null
+  }
   return data
-}
+})
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category, slug } = await params
