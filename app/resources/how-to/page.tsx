@@ -68,7 +68,7 @@ export default async function HowToPage() {
                         {guide.difficulty}
                       </span>
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {guide.reading_time} min
+                        <Clock className="h-3 w-3" aria-hidden="true" /> {guide.reading_time} min
                       </span>
                     </div>
                     <h2 className="font-bold leading-snug group-hover:text-primary transition-colors">
@@ -76,7 +76,7 @@ export default async function HowToPage() {
                     </h2>
                     <p className="text-sm text-muted-foreground line-clamp-2">{guide.excerpt}</p>
                     <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
-                      Read guide <ArrowRight className="h-4 w-4" />
+                      Read guide <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </span>
                   </CardContent>
                 </Card>
