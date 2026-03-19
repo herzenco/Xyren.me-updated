@@ -15,20 +15,13 @@ const handler = NextAuth({
   callbacks: {
     async signIn({ user }: any) {
       // Only allow specific domains
-      if (!user?.email) {
-        console.log('signIn callback: no email provided')
-        return false
-      }
+      if (!user?.email) return false
 
       const emailDomain = user.email.split('@')[1]
-      console.log(`signIn callback: email=${user.email}, domain=${emailDomain}, allowed=${ALLOWED_DOMAINS}`)
-
       if (!ALLOWED_DOMAINS.includes(emailDomain)) {
-        console.error(`❌ Access denied: ${user.email} not in allowed domains (${emailDomain})`)
+        console.error(`Access denied: ${user.email} not in allowed domains`)
         return false
       }
-
-      console.log(`✅ Domain validation passed for ${user.email}`)
 
       // Store/update user in Supabase
       const supabase = createAdminClient()

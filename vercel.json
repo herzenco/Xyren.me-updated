@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/content/generate",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/seo/audit",
+      "schedule": "0 10 * * 1"
+    },
+    {
+      "path": "/api/content/sync-performance",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}

@@ -18,8 +18,9 @@ export const metadata: Metadata = {
 async function getPosts() {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from('posts')
+    .from('blog_posts')
     .select('*')
+    .eq('is_published', true)
     .order('published_at', { ascending: false })
 
   if (error) {
@@ -27,7 +28,7 @@ async function getPosts() {
     return []
   }
 
-  return data
+  return data ?? []
 }
 
 const categories = ['All', 'SEO', 'Marketing', 'Design', 'Business']
@@ -87,7 +88,7 @@ export default async function BlogPage() {
                     <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
                     <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
                       <span>
-                        {new Date(post.published_at).toLocaleDateString('en-US', {
+                        {new Date(post.published_at ?? Date.now()).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',

@@ -1,10 +1,5 @@
-'use client'
-
 import { ArrowRight, Wrench, Building2 } from 'lucide-react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
-import { floatUp, floatLeft, containerVariants } from '@/lib/animations'
 
 const useCases = [
   {
@@ -18,8 +13,7 @@ const useCases = [
   {
     icon: Building2,
     title: 'Professional Services',
-    tagline:
-      'For expertise-driven businesses that convert trust into booked consultations.',
+    tagline: 'For expertise-driven businesses that convert trust into booked consultations.',
     description:
       'Establish credibility and guide higher-consideration decisions. Qualify leads and book appointments with clear next steps that reflect the weight of your expertise.',
     href: '/use-cases/professional-services',
@@ -27,22 +21,14 @@ const useCases = [
 ]
 
 export function Portfolio() {
-  const { ref, inView } = useInView({ threshold: 0.1, triggerOnce: true })
-
   return (
-    <section ref={ref} id="portfolio" className="py-24 md:py-32">
+    <section id="portfolio" className="py-24 md:py-32">
       <div className="container mx-auto px-6">
-        {/* Heading */}
         <div className="mx-auto max-w-4xl text-center mb-6">
-          <motion.h2
-            variants={floatUp}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            className="text-4xl font-bold tracking-[-0.03em] sm:text-5xl md:text-[56px] leading-[1.1]"
-          >
+          <h2 className="text-4xl font-bold tracking-[-0.03em] sm:text-5xl md:text-[56px] leading-[1.1]">
             Two Service Models.{' '}
             <span className="text-gradient">Built to Fit Your Business.</span>
-          </motion.h2>
+          </h2>
         </div>
 
         <p className="mx-auto max-w-2xl text-center text-lg text-muted-foreground leading-relaxed mb-16">
@@ -50,33 +36,21 @@ export function Portfolio() {
           they&apos;re built around how your business actually operates.
         </p>
 
-        {/* Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-5xl mx-auto"
-        >
-          {useCases.map((useCase, index) => {
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+          {useCases.map((useCase) => {
             const Icon = useCase.icon
             return (
-              <motion.div
+              <div
                 key={useCase.title}
-                variants={index % 2 === 0 ? floatUp : floatLeft}
-                whileHover={{ scale: 1.02 }}
-                className="rounded-2xl border border-border bg-card p-8 flex flex-col justify-between"
+                className="rounded-2xl border border-border bg-card p-8 flex flex-col justify-between hover:border-primary/40 transition-colors"
               >
                 <div>
                   <div className="icon-container mb-6">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">{useCase.title}</h3>
-                  <p className="text-sm text-foreground/80 mb-4">
-                    {useCase.tagline}
-                  </p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {useCase.description}
-                  </p>
+                  <p className="text-sm text-foreground/80 mb-4">{useCase.tagline}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{useCase.description}</p>
                 </div>
                 <div className="mt-8">
                   <Link
@@ -87,12 +61,11 @@ export function Portfolio() {
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </Link>
                 </div>
-              </motion.div>
+              </div>
             )
           })}
-        </motion.div>
+        </div>
 
-        {/* Bottom text */}
         <p className="mx-auto mt-12 max-w-xl text-center text-sm text-muted-foreground">
           One proven system. Adapted to how your business sells.
         </p>

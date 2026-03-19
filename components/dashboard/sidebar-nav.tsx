@@ -9,6 +9,8 @@ import {
   Mail,
   BarChart3,
   Users,
+  LayoutList,
+  SearchCheck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +19,11 @@ const navItems = [
     label: 'Overview',
     href: '/dashboard',
     icon: BarChart3,
+  },
+  {
+    label: 'Content',
+    href: '/dashboard/content',
+    icon: LayoutList,
   },
   {
     label: 'Blog',
@@ -32,6 +39,11 @@ const navItems = [
     label: 'FAQ',
     href: '/dashboard/faq',
     icon: HelpCircle,
+  },
+  {
+    label: 'SEO',
+    href: '/dashboard/seo',
+    icon: SearchCheck,
   },
   {
     label: 'Submissions',

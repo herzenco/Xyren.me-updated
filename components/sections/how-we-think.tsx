@@ -1,9 +1,4 @@
-'use client'
-
 import { Zap, Target, Clock } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
-import { floatUp, floatDown, floatLeft, floatRight, containerVariants } from '@/lib/animations'
 
 const pillars = [
   {
@@ -24,18 +19,9 @@ const pillars = [
 ]
 
 export function HowWeThink() {
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  })
-
-  // Define animation variants for each card
-  const cardAnimations = [floatUp, floatDown, floatLeft, floatRight]
-
   return (
-    <section className="py-24 md:py-32" ref={ref}>
+    <section className="py-24 md:py-32">
       <div className="container mx-auto px-6">
-        {/* Heading */}
         <div className="mx-auto max-w-4xl text-center mb-6">
           <h2 className="text-4xl font-bold tracking-[-0.03em] sm:text-5xl md:text-[56px] leading-[1.1]">
             Most websites look fine.{' '}
@@ -51,24 +37,11 @@ export function HowWeThink() {
           differently.
         </p>
 
-        {/* Pillars */}
-        <motion.div
-          className="grid grid-cols-1 gap-12 sm:grid-cols-3 max-w-4xl mx-auto"
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-        >
-          {pillars.map((pillar, index) => {
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-3 max-w-4xl mx-auto">
+          {pillars.map((pillar) => {
             const Icon = pillar.icon
-            const animationVariant = cardAnimations[index % cardAnimations.length]
             return (
-              <motion.div
-                key={pillar.title}
-                className="flex flex-col items-center text-center gap-4"
-                variants={animationVariant}
-                initial="hidden"
-                animate={inView ? 'visible' : 'hidden'}
-              >
+              <div key={pillar.title} className="flex flex-col items-center text-center gap-4">
                 <div className="icon-container">
                   <Icon className="h-6 w-6" />
                 </div>
@@ -76,12 +49,11 @@ export function HowWeThink() {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {pillar.description}
                 </p>
-              </motion.div>
+              </div>
             )
           })}
-        </motion.div>
+        </div>
 
-        {/* Bottom text */}
         <p className="mx-auto mt-16 max-w-xl text-center text-sm text-muted-foreground">
           This approach works best for service businesses that depend on leads
           and bookings.
