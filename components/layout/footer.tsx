@@ -7,9 +7,9 @@ const footerLinks = {
     { label: 'Pricing', href: '/#pricing' },
   ],
   Resources: [
-    { label: 'Case Studies', href: '/resources/blog' },
-    { label: 'Documentation', href: '/resources/how-to' },
-    { label: 'Support', href: '/resources/faq' },
+    { label: 'Blog', href: '/resources/blog' },
+    { label: 'How-To Guides', href: '/resources/how-to' },
+    { label: 'FAQ', href: '/#faq' },
   ],
   Company: [
     { label: 'About', href: '/about' },
