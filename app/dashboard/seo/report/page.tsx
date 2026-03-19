@@ -16,7 +16,11 @@ type AuditRow = {
   ai_suggestions: SeoSuggestion | null
 }
 
-export default async function SeoReportPage() {
+export default async function SeoReportPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ print?: string }>
+}) {
   const supabase = await createClient()
   const { data: rows } = await (supabase as any)
     .from('seo_audit_log')
@@ -27,7 +31,7 @@ export default async function SeoReportPage() {
   const total = pages.length
   const withIssues = pages.filter((p) => p.issues?.length > 0).length
   const indexed = pages.filter((p) => p.indexed).length
-  const notIndexed = pages.filter((p) => !p.indexed && p.status_code > 0).length
+  const notIndexed = pages.filter((p) => !p.indexed).length
   const generatedAt = new Date().toLocaleDateString('en-US', {
     month: 'long', day: 'numeric', year: 'numeric',
   })
@@ -35,9 +39,12 @@ export default async function SeoReportPage() {
     .filter((p) => p.issues?.length > 0)
     .sort((a, b) => b.issues.length - a.issues.length)
 
+  const params = await searchParams
+  const autoPrint = params.print === '1'
+
   return (
     <>
-      <PrintTrigger />
+      {autoPrint && <PrintTrigger />}
       <div className="max-w-4xl mx-auto p-8 font-sans text-foreground">
         {/* Header */}
         <div className="flex items-start justify-between mb-8 pb-6 border-b border-border">
