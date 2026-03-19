@@ -4,6 +4,7 @@ interface ContentDraft {
   type: string
   category: string | null
   excerpt: string | null
+  content: string | null
   seo_score: number | null
   readability_score: number | null
   focus_keyword: string | null
@@ -25,7 +26,7 @@ export async function notifyDraftViaClickUp(draft: ContentDraft): Promise<{ succ
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xyren.me'
-  const dashboardUrl = `${siteUrl}/dashboard/content`
+  const dashboardUrl = `${siteUrl}/dashboard/content/${draft.id}`
 
   const seoEmoji = (draft.seo_score ?? 0) >= 80 ? '🟢' : (draft.seo_score ?? 0) >= 60 ? '🟡' : '🔴'
 
@@ -62,6 +63,12 @@ ${(draft.tags ?? []).join(', ') || '—'}
 
 ---
 
+### Full Content
+
+${draft.content ?? 'No content generated'}
+
+---
+
 **[→ Review & Approve in Dashboard](${dashboardUrl})**
 `
 
@@ -73,7 +80,7 @@ ${(draft.tags ?? []).join(', ') || '—'}
       const body: Record<string, unknown> = {
         name: `[Draft] ${draft.title}`,
         description,
-        status: 'to do',
+        status: 'draft',
         priority: 2, // High
         tags: ['ai-content', draft.type],
       }
