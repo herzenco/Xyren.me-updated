@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { anthropic } from '@/lib/anthropic'
 import { createClient } from '@supabase/supabase-js'
 
 // Use an untyped client so content-engine tables don't require generated types yet
@@ -9,8 +9,6 @@ function createContentClient() {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 }
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export interface TopicDecision {
   type: 'blog' | 'how-to'

@@ -1,11 +1,9 @@
 'use server'
 
-import Anthropic from '@anthropic-ai/sdk'
+import { anthropic } from '@/lib/anthropic'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export interface SeoSuggestion {
   suggested_title: string
@@ -43,7 +41,7 @@ export async function analyzePageSeo(pageId: string): Promise<void> {
 URL: ${page.page_url}
 Current meta title: ${page.meta_title ?? 'MISSING'}
 Current meta description: ${page.meta_description ?? 'MISSING'}
-Issues detected: ${(page.issues as string[]).join(', ')}
+Issues detected: ${Array.isArray(page.issues) ? page.issues.join(', ') : String(page.issues ?? 'none')}
 
 Return ONLY valid JSON (no markdown fences):
 {
@@ -71,10 +69,11 @@ Priority rules: HTTP errors and noindex = high. Missing title/description = high
     throw new Error(`Claude returned non-JSON: ${text.slice(0, 200)}`)
   }
 
-  await (supabase as any)
+  const { error: updateError } = await (supabase as any)
     .from('seo_audit_log')
     .update({ ai_suggestions: suggestions })
     .eq('id', pageId)
+  if (updateError) throw new Error(`Failed to save suggestions: ${updateError.message}`)
 
   revalidatePath('/dashboard/seo')
 }
