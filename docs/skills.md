@@ -4,6 +4,143 @@
 
 ---
 
+## Session Log — 2026-03-18
+
+### What Was Completed Today
+
+#### Data Layer Fixes
+- Fixed `app/resources/how-to/page.tsx` — wrong table name (`guides` → `how_to_guides`), added `is_published` filter, select specific columns
+- Fixed `app/resources/faq/page.tsx` — wrong table name (`faqs` → `faq_items`), wrong order column (`order` → `sort_order`), added `is_published` filter
+- Fixed `app/resources/blog/page.tsx` — null crash on `published_at` (`new Date(post.published_at ?? Date.now())`)
+- Fixed `app/resources/how-to/[slug]/page.tsx` — replaced hardcoded data with real Supabase query using `React.cache()`
+
+#### SEO & Meta (Tasks 15–16)
+- Added full JSON-LD structured data to all dynamic routes:
+  - `BlogPosting` schema → `app/resources/blog/[category]/[slug]/page.tsx`
+  - `HowTo` schema → `app/resources/how-to/[slug]/page.tsx`
+  - `FAQPage` schema → `app/resources/faq/page.tsx`
+- Added OG tags (`url`, `images`, `authors`, `modifiedTime`) to blog post pages
+- Created dynamic OG image route → `app/og/route.tsx` (1200×630, branded dark card with cyan/violet gradient)
+  - Supports `?title=` and `?type=` query params
+  - **Do NOT add `export const runtime = 'edge'`** — breaks Turbopack local dev
+- Updated `lib/config.ts` → `ogImage: '/og'` (points to dynamic route instead of static file)
+- `JsonLd` global component already wired in `app/layout.tsx` (line 89)
+
+#### SEO Audit System (Task 17–18)
+- Created `lib/seo-audit.ts` — shared audit logic (fetches pages, detects 7 issue types, upserts to `seo_audit_log` table)
+- Created `app/api/seo/audit/route.ts` — cron-auth'd endpoint that calls `runSeoAudit()`
+- Created `lib/actions/seo.ts` — server action `triggerSeoAudit(): Promise<void>` (must return void for HTML form action)
+- Created `app/dashboard/seo/page.tsx` — stats cards, pages-with-issues list, full audit table, "Run Audit Now" button
+- Added SEO nav item to `components/dashboard/sidebar-nav.tsx`
+- Dynamic sitemap (`app/sitemap.ts`) converted to `async`, now fetches published blog posts and guides from Supabase
+
+#### GA4 / Analytics (Task 19–20)
+- Fixed `lib/ga4.ts` — lazy initialization pattern (module-level client caused build crashes when env vars absent)
+  - `getClient()` returns `null` if env vars missing; all 6 data functions guard against null
+  - Added `isGa4Configured()` export
+- Updated `app/dashboard/analytics/page.tsx` — shows setup instructions with required env var names when GA4 not configured
+- Created `app/api/content/sync-performance/route.ts` — cron route, fetches top 50 GA4 pages (30d), maps to content IDs, inserts into `content_performance`
+
+#### Framer Motion Removal (Homepage)
+- Removed all Framer Motion from section components — converted to plain server components:
+  - `components/sections/hero.tsx`
+  - `components/sections/how-we-think.tsx`
+  - `components/sections/portfolio.tsx`
+  - `components/sections/tools.tsx`
+  - `components/sections/pricing.tsx`
+- `components/sections/contact.tsx` — kept `'use client'` (form state), removed `AnimatePresence`/`motion.*`
+  - Fixed WhatsApp button: `href="https://wa.me/17865893484"`, color `#25D366`, green SVG icon
+  - Improved error handling: parses `json.error` from API response before throwing
+
+#### Environment Variables (`.env.local`)
+All required vars are now set. Full list:
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+NEXT_PUBLIC_SITE_URL=http://localhost:8000
+CONTACT_EMAIL=hello@xyren.me
+NEXTAUTH_SECRET
+NEXTAUTH_URL=http://localhost:8000
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+RESEND_API_KEY
+ANTHROPIC_API_KEY
+GOOGLE_GEMINI_API_KEY
+CLICKUP_API_KEY
+CLICKUP_TEAM_ID=9014626967
+CLICKUP_CONTENT_LIST_ID=901414628698
+CLICKUP_ASSIGNEE_ID=57046362
+CLICKUP_LEADS_LIST_ID=901413811201
+CRON_SECRET
+```
+**Still missing (GA4 analytics will show "not configured" until these are added):**
+```
+NEXT_PUBLIC_GA4_PROPERTY_ID
+GA4_CLIENT_EMAIL
+GA4_PRIVATE_KEY
+```
+
+#### Git & Project Cleanup
+- Removed 3 stale worktrees: `xyren-redesign`, `content-engine`, `dashboard-setup`
+- Deleted orphaned branches: `feature/content-engine`, `feature/dashboard-setup`, `worktree-xyren-redesign`
+- Deleted unused files: `lib/animations.ts`, `components/layout/theme-provider.tsx`, `components/layout/theme-toggle.tsx`
+- Removed unused packages: `framer-motion`, `react-intersection-observer`, `next-themes`
+- Cleaned verbose `console.log` calls from NextAuth sign-in callback
+- Added `aria-hidden="true"` to decorative icons (`<Clock />`, `<ArrowRight />`) in `app/resources/how-to/page.tsx`
+
+---
+
+### Current State (end of 2026-03-18)
+
+**Branch:** `DEVELOPMENT` (up to date with origin)
+**Latest commit:** `d77a507` — fix: add aria-hidden to decorative icons in how-to listing
+**TypeScript:** Passing clean (`tsc --noEmit` exits 0)
+
+**Routes verified working:**
+- `/` — Homepage (all sections, no Framer Motion)
+- `/resources/blog` — Blog listing (Supabase, no crash)
+- `/resources/blog/[category]/[slug]` — Individual posts with JSON-LD + OG
+- `/resources/how-to` — Guide listing (correct table, accessibility fixed)
+- `/resources/how-to/[slug]` — Individual guides with HowTo JSON-LD
+- `/resources/faq` — FAQ with FAQPage JSON-LD
+- `/og` — Dynamic OG image generation
+- `/auth` — Google login (domain-restricted to herzenco.co and xyren.me)
+- `/dashboard` — Protected admin panel
+- `/dashboard/content` — Draft queue
+- `/dashboard/seo` — SEO audit dashboard
+- `/dashboard/analytics` — Shows "not configured" (expected — GA4 env vars missing)
+- `/api/contact` — Contact form (saves to Supabase + ClickUp sync + Resend email)
+
+---
+
+### Pickup Tasks for Next Session
+
+**Priority 1 — GA4 Setup**
+- Get GA4 property ID, service account email, and private key from Google Cloud Console
+- Add to `.env.local`:
+  ```
+  NEXT_PUBLIC_GA4_PROPERTY_ID=properties/XXXXXXXXX
+  GA4_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
+  GA4_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+  ```
+- Restart dev server, verify `/dashboard/analytics` shows real data
+
+**Priority 2 — Production Deployment**
+- Merge `DEVELOPMENT` → `main`
+- Set all env vars in Vercel dashboard (same as `.env.local` but with production values: `NEXT_PUBLIC_SITE_URL=https://xyren.me`, `NEXTAUTH_URL=https://xyren.me`)
+- Verify Vercel Cron jobs are active (`vercel.json` configures 3 crons)
+
+**Priority 3 — Content**
+- Run `/api/content/generate` to seed real blog post drafts
+- Review + approve drafts in `/dashboard/content`
+- Publish first batch of posts
+
+**Priority 4 — OG Image**
+- Add a static fallback `public/og-image.png` for social platforms that don't render dynamic OG routes
+
+---
+
 ## 1. Logos & Brand Assets
 
 ### Primary Logos
