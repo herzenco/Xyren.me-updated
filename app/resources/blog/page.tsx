@@ -88,7 +88,7 @@ export default async function BlogPage() {
                     <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
                     <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
                       <span>
-                        {new Date(post.published_at).toLocaleDateString('en-US', {
+                        {new Date(post.published_at ?? Date.now()).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
