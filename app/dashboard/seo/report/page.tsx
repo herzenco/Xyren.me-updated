@@ -1,19 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
 import { PrintTrigger, PrintButton } from '@/components/dashboard/seo-report-print'
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
-import type { SeoSuggestion } from '@/lib/actions/seo-ai'
+import { ReportGenerator } from '@/components/dashboard/seo-report-generator'
 
-type AuditRow = {
+type StatsSnapshot = {
+  total_pages: number
+  pages_with_issues: number
+  indexed: number
+  not_indexed: number
+  health_score: number
+  audit_date: string
+}
+
+type SeoReport = {
   id: string
-  page_url: string
-  status_code: number
-  indexed: boolean
-  canonical_url: string | null
-  meta_title: string | null
-  meta_description: string | null
-  issues: string[]
-  last_checked_at: string
-  ai_suggestions: SeoSuggestion | null
+  generated_at: string
+  report_html: string
+  stats_snapshot: StatsSnapshot
 }
 
 export default async function SeoReportPage({
@@ -22,170 +24,134 @@ export default async function SeoReportPage({
   searchParams: Promise<{ print?: string }>
 }) {
   const supabase = await createClient()
-  const { data: rows } = await (supabase as any)
-    .from('seo_audit_log')
-    .select('*')
-    .order('last_checked_at', { ascending: false })
+  const { data } = await (supabase as any)
+    .from('seo_reports')
+    .select('id, generated_at, report_html, stats_snapshot')
+    .order('generated_at', { ascending: false })
+    .limit(1)
+    .single()
 
-  const pages: AuditRow[] = rows ?? []
-  const total = pages.length
-  const withIssues = pages.filter((p) => p.issues?.length > 0).length
-  const indexed = pages.filter((p) => p.indexed).length
-  const notIndexed = pages.filter((p) => !p.indexed).length
-  const generatedAt = new Date().toLocaleDateString('en-US', {
-    month: 'long', day: 'numeric', year: 'numeric',
-  })
-  const pagesWithIssues = pages
-    .filter((p) => p.issues?.length > 0)
-    .sort((a, b) => b.issues.length - a.issues.length)
-
+  const report = data as SeoReport | null
   const params = await searchParams
   const autoPrint = params.print === '1'
+
+  // No report exists — auto-generate
+  if (!report) {
+    return (
+      <div className="min-h-screen bg-white text-gray-900">
+        <ReportGenerator autoGenerate />
+      </div>
+    )
+  }
+
+  const generatedAt = new Date(report.generated_at).toLocaleDateString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+
+  const score = report.stats_snapshot.health_score
+  const scoreColor = score >= 90 ? '#16a34a' : score >= 75 ? '#2563eb' : score >= 50 ? '#d97706' : '#dc2626'
+  const scoreLabel = score >= 90 ? 'Excellent' : score >= 75 ? 'Good' : score >= 50 ? 'Needs Attention' : 'Critical'
 
   return (
     <>
       {autoPrint && <PrintTrigger />}
-      <div className="max-w-4xl mx-auto p-8 font-sans text-foreground">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-8 pb-6 border-b border-border">
+      <div className="seo-report min-h-screen bg-white text-gray-900">
+
+        {/* Page header — hidden on print */}
+        <div className="print:hidden bg-gray-50 border-b border-gray-200 px-8 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold mb-1">SEO Audit Report</h1>
-            <p className="text-sm text-muted-foreground">Xyren.me · Generated {generatedAt}</p>
+            <p className="text-sm text-gray-500">SEO Audit Report · Generated {generatedAt}</p>
           </div>
-          <PrintButton />
+          <div className="flex items-center gap-3">
+            <ReportGenerator />
+            <PrintButton />
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Total Pages', value: total },
-            { label: 'With Issues', value: withIssues },
-            { label: 'Indexed', value: indexed },
-            { label: 'Not Indexed', value: notIndexed },
-          ].map(({ label, value }) => (
-            <div key={label} className="border border-border rounded-lg p-4 text-center">
-              <p className="text-3xl font-bold">{value}</p>
-              <p className="text-xs text-muted-foreground mt-1">{label}</p>
-            </div>
-          ))}
-        </div>
+        <div className="max-w-3xl mx-auto px-8 py-10">
 
-        {/* Pages with issues + AI suggestions */}
-        {pagesWithIssues.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              Pages Requiring Attention ({pagesWithIssues.length})
-            </h2>
-            <div className="space-y-4">
-              {pagesWithIssues.map((page) => (
-                <div key={page.id} className="border border-border rounded-lg p-4 break-inside-avoid">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <p className="text-sm font-medium text-primary break-all">{page.page_url}</p>
-                    <span className="text-xs px-2 py-0.5 rounded bg-secondary text-muted-foreground flex-shrink-0">
-                      {page.status_code}
-                    </span>
-                  </div>
-                  <ul className="space-y-1 mb-3">
-                    {page.issues.map((issue, i) => (
-                      <li key={i} className="text-xs text-yellow-500 flex items-center gap-1.5">
-                        <AlertTriangle className="h-3 w-3 flex-shrink-0" />
-                        {issue}
-                      </li>
-                    ))}
-                  </ul>
-                  {page.ai_suggestions && (
-                    <div className="border-t border-border pt-3 mt-2 space-y-2">
-                      <p className="text-xs font-semibold text-violet-400">AI Recommendations</p>
-                      <div className="bg-secondary/50 rounded p-2">
-                        <p className="text-xs text-muted-foreground">Suggested title</p>
-                        <p className="text-xs font-medium">{page.ai_suggestions.suggested_title}</p>
-                      </div>
-                      <div className="bg-secondary/50 rounded p-2">
-                        <p className="text-xs text-muted-foreground">Suggested description</p>
-                        <p className="text-xs">{page.ai_suggestions.suggested_description}</p>
-                      </div>
-                      {page.ai_suggestions.fixes.map((fix, i) => (
-                        <div key={i} className="flex gap-2 text-xs">
-                          <span className={`flex-shrink-0 px-1.5 py-0.5 rounded font-medium ${
-                            fix.priority === 'high' ? 'bg-red-500/10 text-red-400' :
-                            fix.priority === 'medium' ? 'bg-yellow-500/10 text-yellow-400' :
-                            'bg-blue-500/10 text-blue-400'
-                          }`}>
-                            {fix.priority}
-                          </span>
-                          <span>{fix.fix}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+          {/* Cover */}
+          <div className="mb-10 pb-8 border-b border-gray-200">
+            <p className="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-2">SEO Audit Report</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-1">Xyren.me</h1>
+            <p className="text-gray-500">{generatedAt}</p>
+
+            {/* Health score */}
+            <div className="mt-6 inline-flex items-center gap-4 border border-gray-200 rounded-xl px-6 py-4">
+              <div>
+                <p className="text-5xl font-extrabold" style={{ color: scoreColor }}>{score}</p>
+                <p className="text-xs text-gray-400 mt-0.5">out of 100</p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-gray-900">{scoreLabel}</p>
+                <p className="text-sm text-gray-500">Overall SEO Health</p>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Full pages table */}
-        <div>
-          <h2 className="text-lg font-semibold mb-4">All Pages ({total})</h2>
-          <table className="w-full text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 pr-4 font-medium text-muted-foreground">URL</th>
-                <th className="text-center py-2 px-2 font-medium text-muted-foreground">Status</th>
-                <th className="text-center py-2 px-2 font-medium text-muted-foreground">Indexed</th>
-                <th className="text-center py-2 px-2 font-medium text-muted-foreground">Issues</th>
-                <th className="text-center py-2 pl-2 font-medium text-muted-foreground">Canonical</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pages.map((page) => (
-                <tr key={page.id} className="border-b border-border/50">
-                  <td className="py-2 pr-4">
-                    <p className="truncate max-w-xs">{page.page_url.replace(/^https?:\/\/[^/]+/, '') || '/'}</p>
-                    {page.meta_title && (
-                      <p className="text-muted-foreground truncate max-w-xs">{page.meta_title}</p>
-                    )}
-                  </td>
-                  <td className="py-2 px-2 text-center">{page.status_code || 'ERR'}</td>
-                  <td className="py-2 px-2 text-center">
-                    {page.indexed
-                      ? <CheckCircle className="h-3 w-3 text-green-500 mx-auto" />
-                      : <XCircle className="h-3 w-3 text-red-500 mx-auto" />
-                    }
-                  </td>
-                  <td className="py-2 px-2 text-center">{page.issues?.length ?? 0}</td>
-                  <td className="py-2 pl-2 text-center">
-                    {page.canonical_url
-                      ? <CheckCircle className="h-3 w-3 text-green-500 mx-auto" />
-                      : <XCircle className="h-3 w-3 text-red-500 mx-auto" />
-                    }
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Claude-generated report content */}
+          <div
+            className="report-content"
+            dangerouslySetInnerHTML={{ __html: report.report_html }}
+          />
+
         </div>
 
         <style>{`
+          /* Report typography */
+          .report-content { font-size: 0.9rem; line-height: 1.7; color: #1f2937; }
+          .report-content h2.report-section-heading {
+            font-size: 1.25rem; font-weight: 700; color: #111827;
+            margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          .report-content h3.report-issue-heading {
+            font-size: 1rem; font-weight: 600; color: #1f2937;
+            margin: 1.5rem 0 0.5rem;
+          }
+          .report-content p { margin: 0.75rem 0; }
+          .report-content ul.report-page-list {
+            list-style: none; padding: 0; margin: 0.5rem 0;
+            display: flex; flex-wrap: wrap; gap: 0.375rem;
+          }
+          .report-content ul.report-page-list li {
+            font-family: monospace; font-size: 0.75rem;
+            background: #f3f4f6; border: 1px solid #e5e7eb;
+            border-radius: 4px; padding: 0.125rem 0.5rem; color: #374151;
+          }
+          .report-content ol.report-fix-steps {
+            padding-left: 1.5rem; margin: 0.5rem 0;
+          }
+          .report-content ol.report-fix-steps li { margin: 0.375rem 0; }
+          .report-content .report-badge-critical {
+            display: inline-block; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            background: #fee2e2; color: #b91c1c;
+            border: 1px solid #fecaca; border-radius: 4px;
+            padding: 0.125rem 0.5rem; margin-right: 0.5rem;
+          }
+          .report-content .report-badge-warning {
+            display: inline-block; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            background: #fef3c7; color: #b45309;
+            border: 1px solid #fde68a; border-radius: 4px;
+            padding: 0.125rem 0.5rem; margin-right: 0.5rem;
+          }
+          .report-content .report-badge-pass {
+            display: inline-block; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            background: #dcfce7; color: #15803d;
+            border: 1px solid #bbf7d0; border-radius: 4px;
+            padding: 0.125rem 0.5rem; margin-right: 0.5rem;
+          }
+
+          /* Print */
           @media print {
-            @page { margin: 1.5cm; }
+            @page { margin: 2cm; }
             .print\\:hidden { display: none !important; }
-            .break-inside-avoid { break-inside: avoid; }
-            html, body {
-              background: white !important;
-              color: black !important;
-            }
-            html {
-              --background: 0 0% 100%;
-              --foreground: 0 0% 9%;
-              --muted: 0 0% 97%;
-              --muted-foreground: 0 0% 34%;
-              --border: 0 0% 91%;
-              --secondary: 0 0% 97%;
-              --card: 0 0% 100%;
-              --primary: 221 83% 53%;
-            }
+            .seo-report { background: white !important; }
+            h2.report-section-heading { break-before: auto; }
+            ul.report-page-list { break-inside: avoid; }
           }
         `}</style>
       </div>
