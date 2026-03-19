@@ -123,9 +123,10 @@ export async function generateSeoReport(): Promise<void> {
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const firstBlock = response.content[0]
-  const reportHtml = firstBlock?.type === 'text' ? firstBlock.text : ''
-  if (!reportHtml.trim()) throw new Error('Claude returned an empty report')
+  const rawHtml = response.content[0]?.type === 'text' ? response.content[0].text : ''
+  if (!rawHtml.trim()) throw new Error('Claude returned an empty report')
+  // Strip script tags to prevent XSS if Claude output is ever injected into the page
+  const reportHtml = rawHtml.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
 
   const { error: insertError } = await (supabase as any)
     .from('seo_reports')

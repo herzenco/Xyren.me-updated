@@ -24,12 +24,17 @@ export default async function SeoReportPage({
   searchParams: Promise<{ print?: string }>
 }) {
   const supabase = await createClient()
-  const { data } = await (supabase as any)
+  const { data, error: queryError } = await (supabase as any)
     .from('seo_reports')
     .select('id, generated_at, report_html, stats_snapshot')
     .order('generated_at', { ascending: false })
     .limit(1)
     .single()
+
+  // PGRST116 = no rows found — treat as null (auto-generate branch)
+  if (queryError && queryError.code !== 'PGRST116') {
+    throw new Error(`Failed to load SEO report: ${queryError.message}`)
+  }
 
   const report = data as SeoReport | null
   const params = await searchParams
@@ -44,7 +49,7 @@ export default async function SeoReportPage({
     )
   }
 
-  const generatedAt = new Date(report.generated_at).toLocaleDateString('en-US', {
+  const generatedAt = new Date(report.generated_at).toLocaleString('en-US', {
     month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 
