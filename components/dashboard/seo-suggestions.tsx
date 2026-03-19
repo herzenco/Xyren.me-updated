@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { analyzePageSeo } from '@/lib/actions/seo-ai'
 import type { SeoSuggestion } from '@/lib/actions/seo-ai'
 import { Button } from '@/components/ui/button'
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function SeoSuggestions({ pageId, initialSuggestions }: Props) {
+  const router = useRouter()
   const [expanded, setExpanded] = useState(!!initialSuggestions)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +29,7 @@ export function SeoSuggestions({ pageId, initialSuggestions }: Props) {
     startTransition(async () => {
       try {
         await analyzePageSeo(pageId)
-        window.location.reload()
+        router.refresh()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Analysis failed')
       }

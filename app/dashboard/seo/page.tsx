@@ -47,7 +47,7 @@ export default async function SeoDashboardPage() {
   const supabase = await createClient()
   const { data: rows } = await (supabase as any)
     .from('seo_audit_log')
-    .select('*')
+    .select('id, page_url, status_code, indexed, canonical_url, meta_title, meta_description, issues, last_checked_at, ai_suggestions')
     .order('last_checked_at', { ascending: false })
 
   const pages: AuditRow[] = rows ?? []
@@ -72,12 +72,12 @@ export default async function SeoDashboardPage() {
           {lastChecked && (
             <p className="text-sm text-muted-foreground">Last run: {lastChecked}</p>
           )}
-          <Link href="/dashboard/seo/report?print=1" target="_blank">
-            <Button size="sm" variant="outline" className="gap-2">
+          <Button asChild size="sm" variant="outline" className="gap-2">
+            <Link href="/dashboard/seo/report?print=1" target="_blank">
               <FileDown className="h-4 w-4" />
               Export PDF
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <form action={triggerSeoAudit}>
             <Button type="submit" size="sm" variant="outline" className="gap-2">
               <RefreshCw className="h-4 w-4" />
