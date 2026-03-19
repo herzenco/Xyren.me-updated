@@ -3,8 +3,11 @@ import { PageHeader } from '@/components/dashboard/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { CheckCircle, XCircle, AlertTriangle, Globe, RefreshCw } from 'lucide-react'
+import { CheckCircle, XCircle, AlertTriangle, Globe, RefreshCw, FileDown } from 'lucide-react'
 import { triggerSeoAudit } from '@/lib/actions/seo'
+import { SeoSuggestions } from '@/components/dashboard/seo-suggestions'
+import type { SeoSuggestion } from '@/lib/actions/seo-ai'
+import Link from 'next/link'
 
 type AuditRow = {
   id: string
@@ -16,6 +19,7 @@ type AuditRow = {
   meta_description: string | null
   issues: string[]
   last_checked_at: string
+  ai_suggestions: SeoSuggestion | null
 }
 
 function StatusBadge({ code }: { code: number }) {
@@ -68,6 +72,12 @@ export default async function SeoDashboardPage() {
           {lastChecked && (
             <p className="text-sm text-muted-foreground">Last run: {lastChecked}</p>
           )}
+          <Link href="/dashboard/seo/report?print=1" target="_blank">
+            <Button size="sm" variant="outline" className="gap-2">
+              <FileDown className="h-4 w-4" />
+              Export PDF
+            </Button>
+          </Link>
           <form action={triggerSeoAudit}>
             <Button type="submit" size="sm" variant="outline" className="gap-2">
               <RefreshCw className="h-4 w-4" />
@@ -142,6 +152,10 @@ export default async function SeoDashboardPage() {
                           </li>
                         ))}
                       </ul>
+                      <SeoSuggestions
+                        pageId={page.id}
+                        initialSuggestions={page.ai_suggestions ?? null}
+                      />
                     </CardContent>
                   </Card>
                 ))}
