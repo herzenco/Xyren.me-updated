@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildContext, selectTopic, generateContent, reviewSEO } from '@/lib/content-engine/claude'
+import { buildContext, selectTopic, generateContent, reviewSEO, type TopicOverrides } from '@/lib/content-engine/claude'
 import { generateCoverImage } from '@/lib/content-engine/image-gen'
 import { notifyDraftViaClickUp } from '@/lib/content-engine/clickup-notify'
 
@@ -26,19 +26,34 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // Parse optional overrides from body (cron sends empty body)
+  let overrides: TopicOverrides = {}
+  try {
+    const body = await request.json()
+    if (body && typeof body === 'object') {
+      overrides = {
+        type: body.type,
+        topicHint: body.topicHint,
+        category: body.category,
+      }
+    }
+  } catch {
+    // Empty body from cron — that's fine
+  }
+
   const supabase = createAdminClient()
   const startTime = Date.now()
 
-  console.log('[ContentEngine] Pipeline started')
+  console.log('[ContentEngine] Pipeline started', overrides.topicHint ? `(hint: "${overrides.topicHint}")` : '(auto)')
 
   try {
     // 1. Build context from existing content + performance data
     console.log('[ContentEngine] Building context...')
     const context = await buildContext()
 
-    // 2. Select topic
+    // 2. Select topic (with optional overrides)
     console.log('[ContentEngine] Selecting topic...')
-    const topic = await selectTopic(context)
+    const topic = await selectTopic(context, overrides)
     console.log(`[ContentEngine] Topic: "${topic.title}" (${topic.type}, ${topic.category})`)
 
     // 3. Generate content
@@ -100,12 +115,17 @@ export async function POST(request: NextRequest) {
 
     console.log(`[ContentEngine] Draft saved: ${draft.id}`)
 
-    // 7. Notify via ClickUp (non-fatal)
+    // 7. Notify via ClickUp and save task ID (non-fatal)
     try {
       console.log('[ContentEngine] Creating ClickUp task...')
       const clickupResult = await notifyDraftViaClickUp(draft as any)
-      if (clickupResult.success) {
+      if (clickupResult.success && clickupResult.taskId) {
         console.log(`[ContentEngine] ClickUp task created: ${clickupResult.taskId}`)
+        // Save ClickUp task ID back to draft
+        await (supabase as any)
+          .from('content_drafts')
+          .update({ clickup_task_id: clickupResult.taskId })
+          .eq('id', draft.id)
       } else {
         console.error('[ContentEngine] ClickUp notification failed:', clickupResult.error)
       }
