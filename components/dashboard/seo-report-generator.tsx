@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { generateSeoReport } from '@/lib/actions/seo-report'
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react'
@@ -15,7 +15,7 @@ export function ReportGenerator({ autoGenerate = false }: Props) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  function generate() {
+  const generate = useCallback(() => {
     setError(null)
     startTransition(async () => {
       try {
@@ -25,11 +25,11 @@ export function ReportGenerator({ autoGenerate = false }: Props) {
         setError(e instanceof Error ? e.message : 'Generation failed')
       }
     })
-  }
+  }, [router])
 
   useEffect(() => {
     if (autoGenerate) generate()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [autoGenerate, generate])
 
   if (isPending) {
     return (
