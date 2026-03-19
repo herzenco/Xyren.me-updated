@@ -1,0 +1,80 @@
+'use server'
+
+import Anthropic from '@anthropic-ai/sdk'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+export interface SeoSuggestion {
+  suggested_title: string
+  suggested_description: string
+  fixes: {
+    issue: string
+    fix: string
+    priority: 'high' | 'medium' | 'low'
+  }[]
+}
+
+export async function analyzePageSeo(pageId: string): Promise<void> {
+  const authClient = await createClient()
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const supabase = createAdminClient()
+
+  const { data: page, error } = await (supabase as any)
+    .from('seo_audit_log')
+    .select('id, page_url, meta_title, meta_description, issues')
+    .eq('id', pageId)
+    .single()
+
+  if (error || !page) throw new Error('Page not found')
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: `You are an SEO expert. Analyze this page and return specific, actionable fixes.
+
+URL: ${page.page_url}
+Current meta title: ${page.meta_title ?? 'MISSING'}
+Current meta description: ${page.meta_description ?? 'MISSING'}
+Issues detected: ${(page.issues as string[]).join(', ')}
+
+Return ONLY valid JSON (no markdown fences):
+{
+  "suggested_title": "rewritten meta title, 50-70 chars, includes primary keyword",
+  "suggested_description": "rewritten meta description, 120-155 chars, compelling and includes keyword",
+  "fixes": [
+    {
+      "issue": "exact issue string from the issues list above",
+      "fix": "specific instruction for fixing this issue — what to change and how",
+      "priority": "high"
+    }
+  ]
+}
+
+Priority rules: HTTP errors and noindex = high. Missing title/description = high. Too short/long = medium. Missing canonical or OG = medium.`,
+      },
+    ],
+  })
+
+  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+  let suggestions: SeoSuggestion
+  try {
+    suggestions = JSON.parse(text) as SeoSuggestion
+  } catch {
+    throw new Error(`Claude returned non-JSON: ${text.slice(0, 200)}`)
+  }
+
+  await (supabase as any)
+    .from('seo_audit_log')
+    .update({ ai_suggestions: suggestions })
+    .eq('id', pageId)
+
+  revalidatePath('/dashboard/seo')
+}
