@@ -18,7 +18,6 @@ interface Props {
 }
 
 export function SeoSuggestions({ pageId, initialSuggestions }: Props) {
-  const [suggestions, setSuggestions] = useState<SeoSuggestion | null>(initialSuggestions)
   const [expanded, setExpanded] = useState(!!initialSuggestions)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -35,7 +34,7 @@ export function SeoSuggestions({ pageId, initialSuggestions }: Props) {
     })
   }
 
-  if (!suggestions) {
+  if (!initialSuggestions) {
     return (
       <div className="mt-3 flex items-center gap-2">
         <Button
@@ -73,16 +72,16 @@ export function SeoSuggestions({ pageId, initialSuggestions }: Props) {
           <div className="space-y-2">
             <div className="rounded-md bg-secondary/50 p-2">
               <p className="text-xs text-muted-foreground mb-0.5">Suggested title</p>
-              <p className="text-xs font-medium text-foreground">{suggestions.suggested_title}</p>
+              <p className="text-xs font-medium text-foreground">{initialSuggestions.suggested_title}</p>
             </div>
             <div className="rounded-md bg-secondary/50 p-2">
               <p className="text-xs text-muted-foreground mb-0.5">Suggested description</p>
-              <p className="text-xs text-foreground">{suggestions.suggested_description}</p>
+              <p className="text-xs text-foreground">{initialSuggestions.suggested_description}</p>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            {suggestions.fixes.map((fix, i) => (
+            {initialSuggestions.fixes.map((fix, i) => (
               <div key={i} className="rounded-md border border-border p-2">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${priorityStyles[fix.priority]}`}>
@@ -94,19 +93,20 @@ export function SeoSuggestions({ pageId, initialSuggestions }: Props) {
               </div>
             ))}
           </div>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 text-xs text-muted-foreground gap-1"
-            onClick={handleAnalyze}
-            disabled={isPending}
-          >
-            {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-            Re-analyze
-          </Button>
         </div>
       )}
+
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-6 text-xs text-muted-foreground gap-1 mt-2"
+        onClick={handleAnalyze}
+        disabled={isPending}
+      >
+        {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+        Re-analyze
+      </Button>
+      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
     </div>
   )
 }
