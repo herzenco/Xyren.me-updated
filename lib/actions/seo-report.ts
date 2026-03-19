@@ -20,19 +20,21 @@ type AuditRow = {
   } | null
 }
 
+const MAX_PAGES_IN_REPORT = 150
+
 function buildAuditSummary(pages: AuditRow[]) {
   const total = pages.length
   const withIssues = pages.filter((p) => p.issues?.length > 0).length
   const indexed = pages.filter((p) => p.indexed).length
   const notIndexed = pages.filter((p) => !p.indexed).length
   const totalIssues = pages.reduce((sum, p) => sum + (p.issues?.length ?? 0), 0)
+  // Score: 100 minus 20 points per issue per page on average (floor 0)
+  // A site averaging 5+ issues/page scores 0; 0 issues scores 100
   const healthScore = Math.max(0, Math.round(100 - (totalIssues / Math.max(total, 1)) * 20))
   return { total, withIssues, indexed, notIndexed, totalIssues, healthScore }
 }
 
-function buildPrompt(pages: AuditRow[]): string {
-  const summary = buildAuditSummary(pages)
-
+function buildPrompt(pages: AuditRow[], summary: ReturnType<typeof buildAuditSummary>): string {
   const pageData = pages.map((p) => {
     const path = p.page_url.replace(/^https?:\/\/[^/]+/, '') || '/'
     const lines = [
@@ -53,7 +55,7 @@ function buildPrompt(pages: AuditRow[]): string {
     return lines.join('\n')
   }).join('\n\n')
 
-  return `You are a senior SEO consultant producing a professional audit report for a client website (Xyren.me — a web design and digital marketing agency for small businesses).
+  return `Produce a professional SEO audit report for Xyren.me (a web design and digital marketing agency for small businesses).
 
 AUDIT DATA:
 Total pages audited: ${summary.total}
@@ -100,6 +102,8 @@ export async function generateSeoReport(): Promise<void> {
   const { data: rows, error: fetchError } = await (supabase as any)
     .from('seo_audit_log')
     .select('page_url, status_code, indexed, canonical_url, meta_title, meta_description, issues, ai_suggestions')
+    .order('last_checked_at', { ascending: false })
+    .limit(MAX_PAGES_IN_REPORT)
 
   if (fetchError) throw new Error(`Failed to fetch audit data: ${fetchError.message}`)
 
@@ -109,7 +113,8 @@ export async function generateSeoReport(): Promise<void> {
     throw new Error('No audit data found. Run an SEO audit first.')
   }
 
-  const prompt = buildPrompt(pages)
+  const summary = buildAuditSummary(pages)
+  const prompt = buildPrompt(pages, summary)
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',
@@ -118,10 +123,9 @@ export async function generateSeoReport(): Promise<void> {
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const reportHtml = response.content[0].type === 'text' ? response.content[0].text : ''
+  const firstBlock = response.content[0]
+  const reportHtml = firstBlock?.type === 'text' ? firstBlock.text : ''
   if (!reportHtml.trim()) throw new Error('Claude returned an empty report')
-
-  const summary = buildAuditSummary(pages)
 
   const { error: insertError } = await (supabase as any)
     .from('seo_reports')
