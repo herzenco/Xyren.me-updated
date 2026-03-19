@@ -32,7 +32,7 @@ export async function analyzePageSeo(pageId: string): Promise<void> {
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
+    max_tokens: 2048,
     messages: [
       {
         role: 'user',
@@ -67,6 +67,15 @@ Priority rules: HTTP errors and noindex = high. Missing title/description = high
     suggestions = JSON.parse(text) as SeoSuggestion
   } catch {
     throw new Error(`Claude returned non-JSON: ${text.slice(0, 200)}`)
+  }
+
+  // Basic shape validation
+  if (
+    typeof suggestions.suggested_title !== 'string' ||
+    typeof suggestions.suggested_description !== 'string' ||
+    !Array.isArray(suggestions.fixes)
+  ) {
+    throw new Error('Claude returned unexpected response shape')
   }
 
   const { error: updateError } = await (supabase as any)

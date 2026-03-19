@@ -1,3 +1,11 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export type Database = {
   public: {
     Tables: {
@@ -358,6 +366,7 @@ export type Database = {
           meta_title: string | null
           meta_description: string | null
           issues: string[] | null
+          ai_suggestions: Json | null
           last_checked_at: string
         }
         Insert: {
@@ -369,6 +378,7 @@ export type Database = {
           meta_title?: string | null
           meta_description?: string | null
           issues?: string[] | null
+          ai_suggestions?: Json | null
           last_checked_at?: string
         }
         Update: {
@@ -380,6 +390,7 @@ export type Database = {
           meta_title?: string | null
           meta_description?: string | null
           issues?: string[] | null
+          ai_suggestions?: Json | null
           last_checked_at?: string
         }
       }

@@ -172,7 +172,20 @@ export default async function SeoReportPage({
             @page { margin: 1.5cm; }
             .print\\:hidden { display: none !important; }
             .break-inside-avoid { break-inside: avoid; }
-            body { background: white !important; color: black !important; }
+            html, body {
+              background: white !important;
+              color: black !important;
+            }
+            html {
+              --background: 0 0% 100%;
+              --foreground: 0 0% 9%;
+              --muted: 0 0% 97%;
+              --muted-foreground: 0 0% 34%;
+              --border: 0 0% 91%;
+              --secondary: 0 0% 97%;
+              --card: 0 0% 100%;
+              --primary: 221 83% 53%;
+            }
           }
         `}</style>
       </div>
