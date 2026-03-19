@@ -31,10 +31,12 @@ async function getPosts() {
   return data ?? []
 }
 
-const categories = ['All', 'SEO', 'Marketing', 'Design', 'Business']
-
 export default async function BlogPage() {
   const posts = await getPosts()
+
+  const postCategories = new Set(posts.map((p) => p.category?.toLowerCase()))
+  const allCategories = ['SEO', 'Marketing', 'Design', 'Business']
+  const visibleCategories = ['All', ...allCategories.filter((c) => postCategories.has(c.toLowerCase()))]
 
   return (
     <div className="py-20 md:py-28">
@@ -47,8 +49,9 @@ export default async function BlogPage() {
         </div>
 
         {/* Category filter */}
+        {visibleCategories.length > 1 && (
         <div className="flex flex-wrap gap-2 justify-center mb-12">
-          {categories.map((cat) => (
+          {visibleCategories.map((cat) => (
             <Link
               key={cat}
               href={cat === 'All' ? '/resources/blog' : `/resources/blog/${cat.toLowerCase()}`}
@@ -62,6 +65,7 @@ export default async function BlogPage() {
             </Link>
           ))}
         </div>
+        )}
 
         {/* Posts grid */}
         {posts.length === 0 ? (

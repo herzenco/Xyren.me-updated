@@ -27,12 +27,7 @@ export default async function FaqListPage() {
       header: 'Status',
       accessor: (row: any) => row.is_published ? 'Published' : 'Draft',
       render: (value: any, row: any) => (
-        <form
-          action={async () => {
-            'use server'
-            await toggleFaqPublished(row.id, row.is_published)
-          }}
-        >
+        <form action={toggleFaqPublished.bind(null, row.id, row.is_published)}>
           <button
             type="submit"
             className="inline-flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-secondary"

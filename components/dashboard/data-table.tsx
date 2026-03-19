@@ -69,11 +69,7 @@ export function DataTable<T extends { id: string }>({
                 {showDeleteAction && (
                   <td className="px-4 py-3 text-right">
                     <form
-                      action={async () => {
-                        if (onDelete) {
-                          await onDelete(row.id)
-                        }
-                      }}
+                      action={onDelete!.bind(null, row.id)}
                       className="inline"
                     >
                       <button

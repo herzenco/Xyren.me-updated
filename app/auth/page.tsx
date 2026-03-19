@@ -65,7 +65,7 @@ function AuthContent() {
           <Button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full h-10 gap-2 bg-white text-foreground hover:bg-gray-100 border border-border"
+            className="w-full h-10 gap-2 bg-white text-gray-900 hover:bg-gray-100 border border-border"
           >
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
             {isLoading ? 'Signing in...' : 'Sign in with Google'}

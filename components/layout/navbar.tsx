@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -16,14 +17,20 @@ const navLinks = [
     children: [
       { label: 'Blog', href: '/resources/blog' },
       { label: 'How-To Guides', href: '/resources/how-to' },
-      { label: 'FAQ', href: '/resources/faq' },
+      { label: 'FAQ', href: '/#faq' },
     ],
   },
 ]
 
 export function Navbar() {
+  const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+
+  useEffect(() => {
+    setMobileOpen(false)
+    setOpenDropdown(null)
+  }, [pathname])
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">

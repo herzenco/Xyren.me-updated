@@ -21,12 +21,7 @@ export default async function HowToListPage() {
       header: 'Status',
       accessor: (row: any) => row.is_published ? 'Published' : 'Draft',
       render: (value: any, row: any) => (
-        <form
-          action={async () => {
-            'use server'
-            await toggleHowToPublished(row.id, row.is_published)
-          }}
-        >
+        <form action={toggleHowToPublished.bind(null, row.id, row.is_published)}>
           <button
             type="submit"
             className="inline-flex items-center gap-2 text-sm px-2 py-1 rounded hover:bg-secondary"
