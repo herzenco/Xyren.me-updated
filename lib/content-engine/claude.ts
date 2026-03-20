@@ -1,6 +1,11 @@
 import { anthropic } from '@/lib/anthropic'
 import { createClient } from '@supabase/supabase-js'
 
+/** Strip markdown code fences (```json ... ```) that Claude sometimes wraps around JSON */
+function stripFences(text: string): string {
+  return text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
+}
+
 // Use an untyped client so content-engine tables don't require generated types yet
 function createContentClient() {
   return createClient(
@@ -130,7 +135,21 @@ DAY OF WEEK: ${new Date().toLocaleDateString('en-US', { weekday: 'long' })}
 `.trim()
 }
 
-export async function selectTopic(context: string): Promise<TopicDecision> {
+export interface TopicOverrides {
+  type?: 'blog' | 'how-to'
+  topicHint?: string
+  category?: string
+}
+
+export async function selectTopic(context: string, overrides?: TopicOverrides): Promise<TopicDecision> {
+  const constraints: string[] = []
+  if (overrides?.type) constraints.push(`Content type MUST be: ${overrides.type}`)
+  if (overrides?.topicHint) constraints.push(`The topic MUST be about or closely related to: "${overrides.topicHint}"`)
+  if (overrides?.category) constraints.push(`Category MUST be: ${overrides.category}`)
+  const constraintBlock = constraints.length
+    ? `\n\nUSER CONSTRAINTS (follow these strictly):\n${constraints.map(c => `- ${c}`).join('\n')}`
+    : ''
+
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',
     max_tokens: 1024,
@@ -142,6 +161,7 @@ export async function selectTopic(context: string): Promise<TopicDecision> {
 <site_context>
 ${context}
 </site_context>
+${constraintBlock}
 
 Select the best content topic to publish today. Avoid any topic already covered in the existing content listed in <site_context>. Pick topics with real search demand that service business owners would actively search for.
 
@@ -163,7 +183,7 @@ Respond with ONLY valid JSON (no markdown fences, no explanation):
   const text = response.content[0].type === 'text' ? response.content[0].text : ''
   let parsed: TopicDecision
   try {
-    parsed = JSON.parse(text) as TopicDecision
+    parsed = JSON.parse(stripFences(text)) as TopicDecision
   } catch {
     throw new Error(`selectTopic: Claude returned non-JSON response: ${text.slice(0, 300)}`)
   }
@@ -237,7 +257,7 @@ Respond with ONLY valid JSON (no markdown fences):
   const text = response.content[0].type === 'text' ? response.content[0].text : ''
   let parsed: GeneratedContent
   try {
-    parsed = JSON.parse(text) as GeneratedContent
+    parsed = JSON.parse(stripFences(text)) as GeneratedContent
   } catch {
     throw new Error(`generateContent: Claude returned non-JSON response: ${text.slice(0, 300)}`)
   }
@@ -290,7 +310,7 @@ Respond with ONLY valid JSON:
   const text = response.content[0].type === 'text' ? response.content[0].text : '{}'
   let review: { seo_score?: number; readability_score?: number }
   try {
-    review = JSON.parse(text)
+    review = JSON.parse(stripFences(text))
   } catch {
     review = {}
   }

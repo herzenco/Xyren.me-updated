@@ -5,6 +5,36 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { reviseContent } from '@/lib/content-engine/claude'
 
+export async function triggerContentEngine(params: {
+  type?: string
+  topicHint?: string
+  category?: string
+}) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:8000'
+  const cronSecret = process.env.CRON_SECRET
+
+  const body: Record<string, string> = {}
+  if (params.type && params.type !== 'auto') body.type = params.type
+  if (params.topicHint?.trim()) body.topicHint = params.topicHint.trim()
+  if (params.category && params.category !== 'auto') body.category = params.category
+
+  const response = await fetch(`${siteUrl}/api/content/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(cronSecret ? { Authorization: `Bearer ${cronSecret}` } : {}),
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error(err.error || 'Failed to trigger content engine')
+  }
+
+  revalidatePath('/dashboard/content')
+}
+
 export async function approveDraft(draftId: string) {
   const authClient = await createClient()
   const { data: { user } } = await authClient.auth.getUser()
@@ -78,6 +108,35 @@ export async function rejectDraft(draftId: string) {
     .update({ status: 'rejected' })
     .eq('id', draftId)
   revalidatePath('/dashboard/content')
+}
+
+export async function updateDraft(draftId: string, updates: {
+  title?: string
+  content?: string
+  excerpt?: string
+}) {
+  const authClient = await createClient()
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const supabase = createAdminClient()
+
+  const fields: Record<string, unknown> = {}
+  if (updates.title !== undefined) fields.title = updates.title
+  if (updates.content !== undefined) fields.content = updates.content
+  if (updates.excerpt !== undefined) fields.excerpt = updates.excerpt
+
+  if (Object.keys(fields).length === 0) return
+
+  const { error } = await (supabase as any)
+    .from('content_drafts')
+    .update(fields)
+    .eq('id', draftId)
+
+  if (error) throw new Error(`Failed to update draft: ${error.message}`)
+
+  revalidatePath('/dashboard/content')
+  revalidatePath(`/dashboard/content/${draftId}`)
 }
 
 export async function requestDraftChanges(draftId: string, changes: string) {
