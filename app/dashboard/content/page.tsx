@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export default async function ContentDashboardPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data: drafts } = await (supabase as any)
     .from('content_drafts')
     .select('*')
