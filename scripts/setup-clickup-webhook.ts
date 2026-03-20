@@ -11,7 +11,8 @@
  *   NEXT_PUBLIC_SITE_URL (production URL, e.g. https://xyren.me)
  */
 
-import 'dotenv/config'
+import { config } from 'dotenv'
+config({ path: '.env.local' })
 
 async function main() {
   const apiKey = process.env.CLICKUP_API_KEY

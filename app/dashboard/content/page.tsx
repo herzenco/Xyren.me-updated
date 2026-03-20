@@ -4,9 +4,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { CheckCircle, XCircle, Clock, FileText, TrendingUp, RefreshCw } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, FileText, TrendingUp, RefreshCw, Eye } from 'lucide-react'
 import { approveDraft, rejectDraft, requestDraftChanges } from '@/lib/actions/content'
+import { RunEnginePanel } from '@/components/dashboard/run-engine-panel'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default async function ContentDashboardPage() {
   const supabase = await createClient()
@@ -31,6 +33,9 @@ export default async function ContentDashboardPage() {
           AI-generated drafts — review and approve before publishing
         </p>
       </PageHeader>
+
+      {/* Manual trigger */}
+      <RunEnginePanel />
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -155,7 +160,9 @@ function DraftCard({ draft, compact = false }: { draft: any; compact?: boolean }
                     </span>
                   )}
                 </div>
-                <h3 className="font-semibold text-sm leading-snug truncate">{draft.title}</h3>
+                <Link href={`/dashboard/content/${draft.id}`} className="hover:text-primary transition-colors">
+                  <h3 className="font-semibold text-sm leading-snug truncate">{draft.title}</h3>
+                </Link>
                 {!compact && draft.excerpt && (
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{draft.excerpt}</p>
                 )}
@@ -171,23 +178,31 @@ function DraftCard({ draft, compact = false }: { draft: any; compact?: boolean }
             )}
 
             {/* Actions */}
-            {isPending && (
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                <form action={approveDraft.bind(null, draft.id)}>
-                  <Button type="submit" size="sm" className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white">
-                    <CheckCircle className="h-3 w-3" /> Approve &amp; Publish
-                  </Button>
-                </form>
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <Link href={`/dashboard/content/${draft.id}`}>
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                  <Eye className="h-3 w-3" /> View &amp; Edit
+                </Button>
+              </Link>
 
-                <form action={rejectDraft.bind(null, draft.id)}>
-                  <Button type="submit" size="sm" variant="outline" className="h-7 text-xs gap-1 border-red-500/30 text-red-400 hover:bg-red-500/10">
-                    <XCircle className="h-3 w-3" /> Reject
-                  </Button>
-                </form>
+              {isPending && (
+                <>
+                  <form action={approveDraft.bind(null, draft.id)}>
+                    <Button type="submit" size="sm" className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white">
+                      <CheckCircle className="h-3 w-3" /> Approve &amp; Publish
+                    </Button>
+                  </form>
 
-                <ChangesForm draftId={draft.id} />
-              </div>
-            )}
+                  <form action={rejectDraft.bind(null, draft.id)}>
+                    <Button type="submit" size="sm" variant="outline" className="h-7 text-xs gap-1 border-red-500/30 text-red-400 hover:bg-red-500/10">
+                      <XCircle className="h-3 w-3" /> Reject
+                    </Button>
+                  </form>
+
+                  <ChangesForm draftId={draft.id} />
+                </>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>
