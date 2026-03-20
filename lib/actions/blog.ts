@@ -3,11 +3,18 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getServerSession } from 'next-auth'
 import { slugify } from '@/lib/utils'
 import type { Database } from '@/types/database.types'
 
 type BlogPostInsert = Database['public']['Tables']['blog_posts']['Insert']
+
+async function requireAuth() {
+  const session = await getServerSession()
+  if (!session?.user) throw new Error('Unauthorized')
+  return session.user
+}
 
 const blogSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
@@ -23,14 +30,8 @@ const blogSchema = z.object({
 
 export async function createBlogPost(formData: FormData) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const data = Object.fromEntries(formData)
     const validated = blogSchema.parse(data)
@@ -67,14 +68,8 @@ export async function createBlogPost(formData: FormData) {
 
 export async function updateBlogPost(id: string, formData: FormData) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const data = Object.fromEntries(formData)
     const validated = blogSchema.parse(data)
@@ -113,14 +108,8 @@ export async function updateBlogPost(id: string, formData: FormData) {
 
 export async function deleteBlogPost(id: string) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const { error } = await (supabase.from('blog_posts') as any).delete().eq('id', id)
 
@@ -136,14 +125,8 @@ export async function deleteBlogPost(id: string) {
 
 export async function toggleBlogPublished(id: string, currentStatus: boolean) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const { error } = await (supabase.from('blog_posts') as any)
       .update({

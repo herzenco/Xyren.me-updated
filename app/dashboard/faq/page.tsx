@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { DataTable } from '@/components/dashboard/data-table'
 import { deleteFaqItem, toggleFaqPublished } from '@/lib/actions/faq'
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Eye, EyeOff } from 'lucide-react'
 
 export default async function FaqListPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: items } = await (supabase
     .from('faq_items') as any)

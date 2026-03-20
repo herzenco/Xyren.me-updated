@@ -3,10 +3,17 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getServerSession } from 'next-auth'
 import type { Database } from '@/types/database.types'
 
 type HowToGuideInsert = Database['public']['Tables']['how_to_guides']['Insert']
+
+async function requireAuth() {
+  const session = await getServerSession()
+  if (!session?.user) throw new Error('Unauthorized')
+  return session.user
+}
 
 const howToSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
@@ -21,14 +28,8 @@ const howToSchema = z.object({
 
 export async function createHowToGuide(formData: FormData) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const data = Object.fromEntries(formData)
     const validated = howToSchema.parse(data)
@@ -64,14 +65,8 @@ export async function createHowToGuide(formData: FormData) {
 
 export async function updateHowToGuide(id: string, formData: FormData) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const data = Object.fromEntries(formData)
     const validated = howToSchema.parse(data)
@@ -109,14 +104,8 @@ export async function updateHowToGuide(id: string, formData: FormData) {
 
 export async function deleteHowToGuide(id: string) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const { error } = await (supabase.from('how_to_guides') as any).delete().eq('id', id)
 
@@ -132,14 +121,8 @@ export async function deleteHowToGuide(id: string) {
 
 export async function toggleHowToPublished(id: string, currentStatus: boolean) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const { error } = await (supabase
       .from('how_to_guides') as any)

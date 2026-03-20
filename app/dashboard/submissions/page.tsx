@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { DataTable } from '@/components/dashboard/data-table'
 import Link from 'next/link'
@@ -10,7 +10,7 @@ interface PageProps {
 export default async function SubmissionsListPage({
   searchParams,
 }: PageProps) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { status } = await searchParams
 
   let query = (supabase.from('contact_submissions') as any).select('*')

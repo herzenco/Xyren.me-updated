@@ -2,8 +2,15 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getServerSession } from 'next-auth'
 import type { Database } from '@/types/database.types'
+
+async function requireAuth() {
+  const session = await getServerSession()
+  if (!session?.user) throw new Error('Unauthorized')
+  return session.user
+}
 
 type FaqItemInsert = Database['public']['Tables']['faq_items']['Insert']
 
@@ -17,14 +24,8 @@ const faqSchema = z.object({
 
 export async function createFaqItem(formData: FormData) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const data = Object.fromEntries(formData)
     const validated = faqSchema.parse(data)
@@ -55,14 +56,8 @@ export async function createFaqItem(formData: FormData) {
 
 export async function updateFaqItem(id: string, formData: FormData) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const data = Object.fromEntries(formData)
     const validated = faqSchema.parse(data)
@@ -96,14 +91,8 @@ export async function updateFaqItem(id: string, formData: FormData) {
 
 export async function deleteFaqItem(id: string) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const { error } = await (supabase.from('faq_items') as any).delete().eq('id', id)
 
@@ -119,14 +108,8 @@ export async function deleteFaqItem(id: string) {
 
 export async function toggleFaqPublished(id: string, currentStatus: boolean) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const { error } = await (supabase
       .from('faq_items') as any)

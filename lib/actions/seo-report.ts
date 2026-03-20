@@ -2,8 +2,15 @@
 
 import { anthropic } from '@/lib/anthropic'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
+import DOMPurify from 'isomorphic-dompurify'
+
+async function requireAuth() {
+  const session = await getServerSession()
+  if (!session?.user) throw new Error('Unauthorized')
+  return session.user
+}
 
 type AuditRow = {
   page_url: string
@@ -93,10 +100,7 @@ Return ONLY the HTML fragment. No markdown fences, no explanation outside the HT
 }
 
 export async function generateSeoReport(): Promise<void> {
-  const authClient = await createClient()
-  const { data: { user } } = await authClient.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
+  await requireAuth()
   const supabase = createAdminClient()
 
   const { data: rows, error: fetchError } = await (supabase as any)
@@ -125,8 +129,18 @@ export async function generateSeoReport(): Promise<void> {
 
   const rawHtml = response.content[0]?.type === 'text' ? response.content[0].text : ''
   if (!rawHtml.trim()) throw new Error('Claude returned an empty report')
-  // Strip script tags to prevent XSS if Claude output is ever injected into the page
-  const reportHtml = rawHtml.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+  // Sanitize with allowlist — permits formatting tags but blocks scripts, event handlers, javascript: URLs
+  const reportHtml = DOMPurify.sanitize(rawHtml, {
+    ALLOWED_TAGS: [
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr',
+      'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+      'strong', 'em', 'b', 'i', 'u', 'code', 'pre', 'blockquote',
+      'span', 'div', 'a', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+      'img', 'figure', 'figcaption', 'section', 'article',
+    ],
+    ALLOWED_ATTR: ['class', 'href', 'target', 'rel', 'src', 'alt', 'style', 'id'],
+    ALLOW_DATA_ATTR: false,
+  })
 
   const { error: insertError } = await (supabase as any)
     .from('seo_reports')
