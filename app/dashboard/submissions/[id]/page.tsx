@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { updateSubmissionStatus, retryClickUpSync } from '@/lib/actions/submissions'
@@ -11,7 +11,7 @@ export default async function SubmissionDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: submission } = await (supabase
     .from('contact_submissions') as any)

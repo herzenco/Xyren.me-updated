@@ -1,13 +1,19 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getServerSession } from 'next-auth'
 import { runSeoAudit } from '@/lib/seo-audit'
 
+async function requireAuth() {
+  const session = await getServerSession()
+  if (!session?.user) throw new Error('Unauthorized')
+  return session.user
+}
+
 export async function triggerSeoAudit(): Promise<void> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+  await requireAuth()
+  const supabase = createAdminClient()
 
   await runSeoAudit()
   revalidatePath('/dashboard/seo')

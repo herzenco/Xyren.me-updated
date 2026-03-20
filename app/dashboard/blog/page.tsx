@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { DataTable } from '@/components/dashboard/data-table'
 import { deleteBlogPost, toggleBlogPublished } from '@/lib/actions/blog'
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Eye, EyeOff } from 'lucide-react'
 
 export default async function BlogListPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: posts } = await (supabase
     .from('blog_posts') as any)

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,11 +44,21 @@ function IssueBadge({ count }: { count: number }) {
 }
 
 export default async function SeoDashboardPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data: rows } = await (supabase as any)
     .from('seo_audit_log')
     .select('id, page_url, status_code, indexed, canonical_url, meta_title, meta_description, issues, last_checked_at, ai_suggestions')
     .order('last_checked_at', { ascending: false })
+    .then((res: any) => {
+      // If ai_suggestions column doesn't exist yet, retry without it
+      if (res.error?.message?.includes('ai_suggestions')) {
+        return (supabase as any)
+          .from('seo_audit_log')
+          .select('id, page_url, status_code, indexed, canonical_url, meta_title, meta_description, issues, last_checked_at')
+          .order('last_checked_at', { ascending: false })
+      }
+      return res
+    })
 
   const pages: AuditRow[] = rows ?? []
   const total = pages.length

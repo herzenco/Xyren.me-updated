@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PrintTrigger, PrintButton } from '@/components/dashboard/seo-report-print'
 import { ReportGenerator } from '@/components/dashboard/seo-report-generator'
 
@@ -23,7 +23,7 @@ export default async function SeoReportPage({
 }: {
   searchParams: Promise<{ print?: string }>
 }) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data, error: queryError } = await (supabase as any)
     .from('seo_reports')
     .select('id, generated_at, report_html, stats_snapshot')
@@ -31,8 +31,9 @@ export default async function SeoReportPage({
     .limit(1)
     .single()
 
-  // PGRST116 = no rows found — treat as null (auto-generate branch)
-  if (queryError && queryError.code !== 'PGRST116') {
+  // PGRST116 = no rows found, 42P01 = table doesn't exist — treat both as null
+  const benignCodes = ['PGRST116', '42P01']
+  if (queryError && !benignCodes.includes(queryError.code)) {
     throw new Error(`Failed to load SEO report: ${queryError.message}`)
   }
 

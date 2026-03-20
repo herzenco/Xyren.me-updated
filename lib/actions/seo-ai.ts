@@ -2,8 +2,14 @@
 
 import { anthropic } from '@/lib/anthropic'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
+
+async function requireAuth() {
+  const session = await getServerSession()
+  if (!session?.user) throw new Error('Unauthorized')
+  return session.user
+}
 
 export interface SeoSuggestion {
   suggested_title: string
@@ -16,10 +22,7 @@ export interface SeoSuggestion {
 }
 
 export async function analyzePageSeo(pageId: string): Promise<void> {
-  const authClient = await createClient()
-  const { data: { user } } = await authClient.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
+  await requireAuth()
   const supabase = createAdminClient()
 
   const { data: page, error } = await (supabase as any)

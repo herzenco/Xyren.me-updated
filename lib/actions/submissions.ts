@@ -2,10 +2,16 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from 'next-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { clickupService } from '@/lib/clickup'
 import type { Database } from '@/types/database.types'
+
+async function requireAuth() {
+  const session = await getServerSession()
+  if (!session?.user) throw new Error('Unauthorized')
+  return session.user
+}
 
 type SubmissionUpdate = Database['public']['Tables']['contact_submissions']['Update']
 
@@ -18,14 +24,8 @@ export async function updateSubmissionStatus(
   formData: FormData
 ) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error('Unauthorized')
-    }
+    await requireAuth()
+    const supabase = createAdminClient()
 
     const data = Object.fromEntries(formData)
     const validated = statusSchema.parse(data)
@@ -54,13 +54,7 @@ export async function updateSubmissionStatus(
 
 export async function retryClickUpSync(submissionId: string) {
   try {
-    // Auth check
-    const userClient = await createClient()
-    const { data: { user }, error: authError } = await userClient.auth.getUser()
-    if (authError || !user) {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+    await requireAuth()
     const supabase = createAdminClient()
 
     // Fetch the submission

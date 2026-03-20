@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { FileText, BookOpen, HelpCircle, MessageSquare, BarChart3, Users, Mail } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const [blogRes, guideRes, faqRes, submissionsRes, newSubmissionsRes] =
     await Promise.all([

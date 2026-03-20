@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { HowToForm } from '@/components/dashboard/how-to-form'
@@ -9,7 +9,7 @@ export default async function EditHowToGuidePage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: guide } = await (supabase
     .from('how_to_guides') as any)
