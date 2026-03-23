@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { reviseContent } from '@/lib/content-engine/claude'
+import { adjustCategoryCount } from '@/lib/actions/categories'
 
 async function requireAuth() {
   const session = await getServerSession()
@@ -71,6 +72,11 @@ export async function approveDraft(draftId: string) {
       author: 'Xyren.me Team',
     } as any)
     if (insertError) throw new Error(`Failed to publish blog post: ${insertError.message}`)
+
+    // Increment category post count
+    if (draft.category) {
+      await adjustCategoryCount(draft.category, 1).catch(console.error)
+    }
   } else {
     const { error: insertError } = await supabase.from('how_to_guides').insert({
       title: draft.title,
@@ -99,6 +105,9 @@ export async function approveDraft(draftId: string) {
   revalidatePath('/dashboard/content')
   revalidatePath('/resources/blog')
   revalidatePath('/resources/how-to')
+  if (draft.type === 'blog' && draft.category) {
+    revalidatePath(`/resources/blog/${draft.category}`)
+  }
 }
 
 export async function rejectDraft(draftId: string) {
