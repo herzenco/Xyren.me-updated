@@ -13,6 +13,7 @@ import {
   SearchCheck,
   PlusCircle,
   Inbox,
+  Tag,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -29,12 +30,13 @@ const navGroups = [
   {
     label: 'Content',
     icon: LayoutList,
-    basePaths: ['/dashboard/content', '/dashboard/blog', '/dashboard/how-to', '/dashboard/faq'],
+    basePaths: ['/dashboard/content', '/dashboard/blog', '/dashboard/how-to', '/dashboard/faq', '/dashboard/categories'],
     actions: [
       { label: 'Draft Queue', href: '/dashboard/content', icon: LayoutList },
       { label: 'Blog Posts', href: '/dashboard/blog', icon: FileText },
       { label: 'How-To Guides', href: '/dashboard/how-to', icon: BookOpen },
       { label: 'FAQ', href: '/dashboard/faq', icon: HelpCircle },
+      { label: 'Categories', href: '/dashboard/categories', icon: Tag },
       { label: 'New Blog Post', href: '/dashboard/blog/new', icon: PlusCircle },
       { label: 'New Guide', href: '/dashboard/how-to/new', icon: PlusCircle },
       { label: 'New FAQ Item', href: '/dashboard/faq/new', icon: PlusCircle },
