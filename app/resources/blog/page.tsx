@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Clock } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata: Metadata = {
   title: 'Blog — Website & Marketing Tips for Service Professionals',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 async function getPosts() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('blog_posts')
     .select('*')
@@ -34,9 +34,13 @@ async function getPosts() {
 export default async function BlogPage() {
   const posts = await getPosts()
 
-  const postCategories = new Set(posts.map((p) => p.category?.toLowerCase()))
-  const allCategories = ['SEO', 'Marketing', 'Design', 'Business']
-  const visibleCategories = ['All', ...allCategories.filter((c) => postCategories.has(c.toLowerCase()))]
+  // Fetch categories with published posts
+  const catSupabase = createAdminClient()
+  const { data: categories } = await (catSupabase as any)
+    .from('blog_categories')
+    .select('slug, name')
+    .gt('post_count', 0)
+    .order('post_count', { ascending: false })
 
   return (
     <div className="py-20 md:py-28">
@@ -49,18 +53,15 @@ export default async function BlogPage() {
         </div>
 
         {/* Category filter */}
-        {visibleCategories.length > 1 && (
+        {(categories ?? []).length > 0 && (
         <div className="flex flex-wrap gap-2 justify-center mb-12">
-          {visibleCategories.map((cat) => (
-            <Link
-              key={cat}
-              href={cat === 'All' ? '/resources/blog' : `/resources/blog/${cat.toLowerCase()}`}
-            >
-              <Badge
-                variant={cat === 'All' ? 'default' : 'outline'}
-                className="cursor-pointer px-4 py-1.5 text-sm"
-              >
-                {cat}
+          <Link href="/resources/blog">
+            <Badge variant="default" className="cursor-pointer px-4 py-1.5 text-sm">All</Badge>
+          </Link>
+          {(categories ?? []).map((cat: any) => (
+            <Link key={cat.slug} href={`/resources/blog/${cat.slug}`}>
+              <Badge variant="outline" className="cursor-pointer px-4 py-1.5 text-sm">
+                {cat.name}
               </Badge>
             </Link>
           ))}
