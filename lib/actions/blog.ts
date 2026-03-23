@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getServerSession } from 'next-auth'
 import { slugify } from '@/lib/utils'
+import { adjustCategoryCount } from '@/lib/actions/categories'
 import type { Database } from '@/types/database.types'
 
 type BlogPostInsert = Database['public']['Tables']['blog_posts']['Insert']
@@ -111,9 +112,19 @@ export async function deleteBlogPost(id: string) {
     await requireAuth()
     const supabase = createAdminClient()
 
+    const { data: post } = await (supabase.from('blog_posts') as any)
+      .select('category, is_published')
+      .eq('id', id)
+      .single()
+
     const { error } = await (supabase.from('blog_posts') as any).delete().eq('id', id)
 
     if (error) throw error
+
+    if (post?.category && post.is_published) {
+      await adjustCategoryCount(post.category, -1).catch(console.error)
+      revalidatePath(`/resources/blog/${post.category}`)
+    }
 
     revalidatePath('/dashboard/blog')
     revalidatePath('/resources/blog', 'layout')
@@ -128,6 +139,11 @@ export async function toggleBlogPublished(id: string, currentStatus: boolean) {
     await requireAuth()
     const supabase = createAdminClient()
 
+    const { data: post } = await (supabase.from('blog_posts') as any)
+      .select('category')
+      .eq('id', id)
+      .single()
+
     const { error } = await (supabase.from('blog_posts') as any)
       .update({
         is_published: !currentStatus,
@@ -136,6 +152,11 @@ export async function toggleBlogPublished(id: string, currentStatus: boolean) {
       .eq('id', id)
 
     if (error) throw error
+
+    if (post?.category) {
+      await adjustCategoryCount(post.category, currentStatus ? -1 : 1).catch(console.error)
+      revalidatePath(`/resources/blog/${post.category}`)
+    }
 
     revalidatePath('/dashboard/blog')
     revalidatePath('/resources/blog', 'layout')

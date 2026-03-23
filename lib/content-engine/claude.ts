@@ -20,6 +20,11 @@ export interface TopicDecision {
   title: string
   slug: string
   category: string
+  category_name: string
+  is_new_category: boolean
+  category_seo_title?: string
+  category_meta_description?: string
+  category_intro?: string
   target_keyword: string
   secondary_keywords: string[]
   reasoning: string
@@ -150,6 +155,21 @@ export async function selectTopic(context: string, overrides?: TopicOverrides): 
     ? `\n\nUSER CONSTRAINTS (follow these strictly):\n${constraints.map(c => `- ${c}`).join('\n')}`
     : ''
 
+  // Fetch existing categories for context
+  const supabase = createContentClient()
+  const { data: existingCategories } = await supabase
+    .from('blog_categories')
+    .select('slug, name')
+    .order('post_count', { ascending: false })
+
+  const categoryList = (existingCategories ?? [])
+    .map((c: any) => `${c.slug} ("${c.name}")`)
+    .join(', ')
+
+  const categoryInstruction = categoryList
+    ? `\nEXISTING CATEGORIES: ${categoryList}\nPrefer an existing category if the topic fits. Only create a new category if the topic genuinely doesn't fit any existing one.`
+    : `\nNo categories exist yet. Create a new category for this topic.`
+
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-6',
     max_tokens: 1024,
@@ -162,6 +182,7 @@ export async function selectTopic(context: string, overrides?: TopicOverrides): 
 ${context}
 </site_context>
 ${constraintBlock}
+${categoryInstruction}
 
 Select the best content topic to publish today. Avoid any topic already covered in the existing content listed in <site_context>. Pick topics with real search demand that service business owners would actively search for.
 
@@ -170,7 +191,12 @@ Respond with ONLY valid JSON (no markdown fences, no explanation):
   "type": "blog",
   "title": "exact title string",
   "slug": "url-slug-format-lowercase-with-hyphens",
-  "category": "one of: seo, marketing, design, business, technology",
+  "category": "hyphenated-slug (e.g. local-seo, web-design, content-strategy)",
+  "category_name": "Display Name (e.g. Local SEO, Web Design)",
+  "is_new_category": false,
+  "category_seo_title": "only if is_new_category=true — SEO title for category page, 50-60 chars",
+  "category_meta_description": "only if is_new_category=true — meta description, 120-155 chars",
+  "category_intro": "only if is_new_category=true — 2-3 sentence intro for the category landing page",
   "target_keyword": "primary keyword phrase",
   "secondary_keywords": ["keyword2", "keyword3"],
   "reasoning": "2-3 sentences explaining why this topic now",
