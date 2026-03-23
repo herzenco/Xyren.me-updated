@@ -9,21 +9,41 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 type Props = { params: Promise<{ category: string }> }
 
-async function getCategory(slug: string) {
+type CategoryRow = {
+  slug: string
+  name: string
+  seo_title: string | null
+  meta_description: string | null
+  intro: string | null
+  post_count: number
+}
+
+type PostRow = {
+  slug: string
+  title: string
+  excerpt: string
+  category: string
+  reading_time: number | null
+  published_at: string | null
+  cover_image: string | null
+  tags: string[] | null
+}
+
+async function getCategory(slug: string): Promise<CategoryRow | null> {
   const supabase = createAdminClient()
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('blog_categories')
     .select('slug, name, seo_title, meta_description, intro, post_count')
     .eq('slug', slug)
     .single()
 
   if (error || !data) return null
-  return data
+  return data as CategoryRow
 }
 
-async function getCategoryPosts(categorySlug: string) {
+async function getCategoryPosts(categorySlug: string): Promise<PostRow[]> {
   const supabase = createAdminClient()
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('blog_posts')
     .select('slug, title, excerpt, category, reading_time, published_at, cover_image, tags')
     .eq('category', categorySlug)
@@ -35,7 +55,7 @@ async function getCategoryPosts(categorySlug: string) {
     return []
   }
 
-  return data ?? []
+  return (data ?? []) as PostRow[]
 }
 
 function titleCase(slug: string) {

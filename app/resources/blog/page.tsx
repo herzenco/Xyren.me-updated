@@ -15,9 +15,20 @@ export const metadata: Metadata = {
   },
 }
 
-async function getPosts() {
+type BlogPost = {
+  slug: string
+  title: string
+  category: string
+  excerpt: string
+  reading_time: number | null
+  published_at: string | null
+  cover_image: string | null
+  tags: string[] | null
+}
+
+async function getPosts(): Promise<BlogPost[]> {
   const supabase = createAdminClient()
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('blog_posts')
     .select('*')
     .eq('is_published', true)
@@ -28,7 +39,7 @@ async function getPosts() {
     return []
   }
 
-  return data ?? []
+  return (data ?? []) as BlogPost[]
 }
 
 export default async function BlogPage() {

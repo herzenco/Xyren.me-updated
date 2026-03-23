@@ -23,13 +23,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createAdminClient()
 
   // Published blog posts
-  const { data: posts } = await supabase
+  const { data: posts } = await (supabase as any)
     .from('blog_posts')
     .select('slug, category, updated_at')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
 
-  const blogRoutes: MetadataRoute.Sitemap = (posts ?? []).map((post) => ({
+  const blogRoutes: MetadataRoute.Sitemap = (posts ?? []).map((post: any) => ({
     url: `${baseUrl}/resources/blog/${post.category}/${post.slug}`,
     lastModified: post.updated_at ? new Date(post.updated_at) : new Date(),
     changeFrequency: 'weekly',
@@ -50,13 +50,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Published how-to guides
-  const { data: guides } = await supabase
+  const { data: guides } = await (supabase as any)
     .from('how_to_guides')
     .select('slug, updated_at')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
 
-  const guideRoutes: MetadataRoute.Sitemap = (guides ?? []).map((guide) => ({
+  const guideRoutes: MetadataRoute.Sitemap = (guides ?? []).map((guide: any) => ({
     url: `${baseUrl}/resources/how-to/${guide.slug}`,
     lastModified: guide.updated_at ? new Date(guide.updated_at) : new Date(),
     changeFrequency: 'weekly',
