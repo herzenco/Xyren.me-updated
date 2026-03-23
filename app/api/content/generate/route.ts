@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { buildContext, selectTopic, generateContent, reviewSEO, type TopicOverrides } from '@/lib/content-engine/claude'
 import { generateCoverImage } from '@/lib/content-engine/image-gen'
 import { notifyDraftViaClickUp } from '@/lib/content-engine/clickup-notify'
+import { upsertCategory } from '@/lib/actions/categories'
 
 // Allow long-running execution on Vercel
 export const maxDuration = 300
@@ -114,6 +115,22 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[ContentEngine] Draft saved: ${draft.id}`)
+
+    // 6b. Upsert category if new
+    if (topic.is_new_category) {
+      try {
+        await upsertCategory({
+          slug: topic.category,
+          name: topic.category_name,
+          seo_title: topic.category_seo_title,
+          meta_description: topic.category_meta_description,
+          intro: topic.category_intro,
+        })
+        console.log(`[ContentEngine] New category created: ${topic.category}`)
+      } catch (catError) {
+        console.error('[ContentEngine] Category upsert failed (continuing):', catError)
+      }
+    }
 
     // 7. Notify via ClickUp and save task ID (non-fatal)
     try {
