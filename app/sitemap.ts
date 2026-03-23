@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 import { siteConfig } from '@/lib/config'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url
@@ -20,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.8,
   }))
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Published blog posts
   const { data: posts } = await supabase
@@ -34,6 +34,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: post.updated_at ? new Date(post.updated_at) : new Date(),
     changeFrequency: 'weekly',
     priority: 0.7,
+  }))
+
+  // Category pages
+  const { data: categories } = await (supabase as any)
+    .from('blog_categories')
+    .select('slug, updated_at')
+    .gt('post_count', 0)
+
+  const categoryRoutes: MetadataRoute.Sitemap = (categories ?? []).map((cat: any) => ({
+    url: `${baseUrl}/resources/blog/${cat.slug}`,
+    lastModified: cat.updated_at ? new Date(cat.updated_at) : new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.75,
   }))
 
   // Published how-to guides
@@ -50,5 +63,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticRoutes, ...blogRoutes, ...guideRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...blogRoutes, ...guideRoutes]
 }
