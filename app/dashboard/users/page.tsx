@@ -18,7 +18,7 @@ export default async function UsersPage() {
 
   const { data: users, error } = await supabase
     .from('auth_users')
-    .select('*')
+    .select('id, email, name, image, last_login, created_at')
     .order('created_at', { ascending: false })
 
   if (error) {

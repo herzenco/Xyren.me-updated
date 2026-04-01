@@ -4,18 +4,12 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getServerSession } from 'next-auth'
+import { requireAuth } from '@/lib/auth-helpers'
 import { slugify } from '@/lib/utils'
 import { adjustCategoryCount } from '@/lib/actions/categories'
 import type { Database } from '@/types/database.types'
 
 type BlogPostInsert = Database['public']['Tables']['blog_posts']['Insert']
-
-async function requireAuth() {
-  const session = await getServerSession()
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user
-}
 
 const blogSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
@@ -75,6 +69,19 @@ export async function updateBlogPost(id: string, formData: FormData) {
     const data = Object.fromEntries(formData)
     const validated = blogSchema.parse(data)
 
+    // Read current state to avoid overwriting published_at on already-published posts
+    const { data: existing } = await (supabase.from('blog_posts') as any)
+      .select('is_published, published_at')
+      .eq('id', id)
+      .single()
+
+    const isNewlyPublished = validated.is_published && !existing?.is_published
+    const publishedAt = isNewlyPublished
+      ? new Date().toISOString()
+      : validated.is_published
+        ? existing?.published_at
+        : null
+
     const updateData: BlogPostInsert = {
       title: validated.title,
       slug: validated.slug,
@@ -85,7 +92,7 @@ export async function updateBlogPost(id: string, formData: FormData) {
       reading_time: validated.reading_time || undefined,
       tags: validated.tags || undefined,
       is_published: validated.is_published,
-      published_at: validated.is_published ? new Date().toISOString() : null,
+      published_at: publishedAt,
     }
 
     const { error } = await (supabase.from('blog_posts') as any)
@@ -140,21 +147,23 @@ export async function toggleBlogPublished(id: string, currentStatus: boolean) {
     const supabase = createAdminClient()
 
     const { data: post } = await (supabase.from('blog_posts') as any)
-      .select('category')
+      .select('category, is_published')
       .eq('id', id)
       .single()
 
+    const newStatus = !post.is_published
+
     const { error } = await (supabase.from('blog_posts') as any)
       .update({
-        is_published: !currentStatus,
-        published_at: !currentStatus ? new Date().toISOString() : null,
+        is_published: newStatus,
+        published_at: newStatus ? new Date().toISOString() : null,
       })
       .eq('id', id)
 
     if (error) throw error
 
     if (post?.category) {
-      await adjustCategoryCount(post.category, currentStatus ? -1 : 1).catch(console.error)
+      await adjustCategoryCount(post.category, post.is_published ? -1 : 1).catch(console.error)
       revalidatePath(`/resources/blog/${post.category}`)
     }
 

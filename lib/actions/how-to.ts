@@ -4,16 +4,10 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getServerSession } from 'next-auth'
+import { requireAuth } from '@/lib/auth-helpers'
 import type { Database } from '@/types/database.types'
 
 type HowToGuideInsert = Database['public']['Tables']['how_to_guides']['Insert']
-
-async function requireAuth() {
-  const session = await getServerSession()
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user
-}
 
 const howToSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
@@ -71,6 +65,19 @@ export async function updateHowToGuide(id: string, formData: FormData) {
     const data = Object.fromEntries(formData)
     const validated = howToSchema.parse(data)
 
+    // Read current state to avoid overwriting published_at on already-published guides
+    const { data: existing } = await (supabase.from('how_to_guides') as any)
+      .select('is_published, published_at')
+      .eq('id', id)
+      .single()
+
+    const isNewlyPublished = validated.is_published && !existing?.is_published
+    const publishedAt = isNewlyPublished
+      ? new Date().toISOString()
+      : validated.is_published
+        ? existing?.published_at
+        : null
+
     const updateData: HowToGuideInsert = {
       title: validated.title,
       slug: validated.slug,
@@ -80,7 +87,7 @@ export async function updateHowToGuide(id: string, formData: FormData) {
       reading_time: validated.reading_time || undefined,
       tags: validated.tags || undefined,
       is_published: validated.is_published,
-      published_at: validated.is_published ? new Date().toISOString() : null,
+      published_at: publishedAt,
     }
 
     const { error } = await (supabase.from('how_to_guides') as any)
@@ -124,11 +131,18 @@ export async function toggleHowToPublished(id: string, currentStatus: boolean) {
     await requireAuth()
     const supabase = createAdminClient()
 
+    const { data: guide } = await (supabase.from('how_to_guides') as any)
+      .select('is_published')
+      .eq('id', id)
+      .single()
+
+    const newStatus = !guide.is_published
+
     const { error } = await (supabase
       .from('how_to_guides') as any)
       .update({
-        is_published: !currentStatus,
-        published_at: !currentStatus ? new Date().toISOString() : null,
+        is_published: newStatus,
+        published_at: newStatus ? new Date().toISOString() : null,
       })
       .eq('id', id)
 

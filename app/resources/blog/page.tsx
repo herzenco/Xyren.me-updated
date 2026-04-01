@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Clock } from 'lucide-react'
 import { siteConfig } from '@/lib/config'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Blog — Website & Marketing Tips for Service Professionals',
@@ -26,32 +26,15 @@ type BlogPost = {
   tags: string[] | null
 }
 
-async function getPosts(): Promise<BlogPost[]> {
-  const supabase = createAdminClient()
-  const { data, error } = await (supabase as any)
-    .from('blog_posts')
-    .select('*')
-    .eq('is_published', true)
-    .order('published_at', { ascending: false })
-
-  if (error) {
-    console.error('Error fetching blog posts:', error)
-    return []
-  }
-
-  return (data ?? []) as BlogPost[]
-}
 
 export default async function BlogPage() {
-  const posts = await getPosts()
-
-  // Fetch categories with published posts
-  const catSupabase = createAdminClient()
-  const { data: categories } = await (catSupabase as any)
-    .from('blog_categories')
-    .select('slug, name')
-    .gt('post_count', 0)
-    .order('post_count', { ascending: false })
+  const supabase = await createClient()
+  const [postsResult, categoriesResult] = await Promise.all([
+    (supabase as any).from('blog_posts').select('slug, title, category, excerpt, reading_time, published_at, cover_image, tags').eq('is_published', true).order('published_at', { ascending: false }),
+    (supabase as any).from('blog_categories').select('slug, name').gt('post_count', 0).order('post_count', { ascending: false }),
+  ])
+  const posts = (postsResult.data ?? []) as BlogPost[]
+  const categories = categoriesResult.data ?? []
 
   return (
     <div className="py-20 md:py-28">

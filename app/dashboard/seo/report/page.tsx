@@ -1,3 +1,4 @@
+import DOMPurify from 'isomorphic-dompurify'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PrintTrigger, PrintButton } from '@/components/dashboard/seo-report-print'
 import { ReportGenerator } from '@/components/dashboard/seo-report-generator'
@@ -98,7 +99,7 @@ export default async function SeoReportPage({
           {/* Claude-generated report content */}
           <div
             className="report-content"
-            dangerouslySetInnerHTML={{ __html: report.report_html }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(report.report_html) }}
           />
 
         </div>
