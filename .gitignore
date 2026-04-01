@@ -52,3 +52,4 @@ xyren-*.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+supabase/.temp/
