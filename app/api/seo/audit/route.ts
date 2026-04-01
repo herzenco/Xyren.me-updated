@@ -3,7 +3,15 @@ import { runSeoAudit } from '@/lib/seo-audit'
 
 export const maxDuration = 300
 
+export async function GET(request: NextRequest) {
+  return handleAudit(request)
+}
+
 export async function POST(request: NextRequest) {
+  return handleAudit(request)
+}
+
+async function handleAudit(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
   const authHeader = request.headers.get('authorization')
 
