@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
+import { auth } from '@/auth'
 import { SidebarNav } from '@/components/dashboard/sidebar-nav'
+import { SignOutButton } from '@/components/dashboard/sign-out-button'
 import { Menu } from 'lucide-react'
 import {
   Sheet,
@@ -18,7 +19,7 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   // Check authentication
-  const session = await getServerSession()
+  const session = await auth()
 
   if (!session?.user) {
     redirect('/auth')
@@ -35,14 +36,7 @@ export default async function DashboardLayout({
           <SidebarNav />
         </nav>
         <div className="p-4 border-t border-border">
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors"
-            >
-              Sign Out
-            </button>
-          </form>
+          <SignOutButton className="w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors" />
         </div>
       </aside>
 
@@ -66,14 +60,7 @@ export default async function DashboardLayout({
                   <SidebarNav />
                 </nav>
                 <div className="p-4 border-t border-border">
-                  <form action="/api/auth/logout" method="POST">
-                    <button
-                      type="submit"
-                      className="w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors text-left"
-                    >
-                      Sign Out
-                    </button>
-                  </form>
+                  <SignOutButton className="w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors text-left" />
                 </div>
               </SheetContent>
             </Sheet>

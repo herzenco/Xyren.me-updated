@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, ArrowRight, Clock } from 'lucide-react'
+import { cache } from 'react'
 import { siteConfig } from '@/lib/config'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 type Props = { params: Promise<{ category: string }> }
 
@@ -29,8 +30,8 @@ type PostRow = {
   tags: string[] | null
 }
 
-async function getCategory(slug: string): Promise<CategoryRow | null> {
-  const supabase = createAdminClient()
+const getCategory = cache(async (slug: string): Promise<CategoryRow | null> => {
+  const supabase = await createClient()
   const { data, error } = await (supabase as any)
     .from('blog_categories')
     .select('slug, name, seo_title, meta_description, intro, post_count')
@@ -39,10 +40,10 @@ async function getCategory(slug: string): Promise<CategoryRow | null> {
 
   if (error || !data) return null
   return data as CategoryRow
-}
+})
 
 async function getCategoryPosts(categorySlug: string): Promise<PostRow[]> {
-  const supabase = createAdminClient()
+  const supabase = await createClient()
   const { data, error } = await (supabase as any)
     .from('blog_posts')
     .select('slug, title, excerpt, category, reading_time, published_at, cover_image, tags')
@@ -122,7 +123,7 @@ export default async function BlogCategoryPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
 
       <div className="py-20 md:py-28">

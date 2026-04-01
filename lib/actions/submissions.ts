@@ -2,16 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { getServerSession } from 'next-auth'
+import { requireAuth } from '@/lib/auth-helpers'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { clickupService } from '@/lib/clickup'
 import type { Database } from '@/types/database.types'
-
-async function requireAuth() {
-  const session = await getServerSession()
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user
-}
 
 type SubmissionUpdate = Database['public']['Tables']['contact_submissions']['Update']
 

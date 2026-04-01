@@ -2,15 +2,9 @@
 
 import { anthropic } from '@/lib/anthropic'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getServerSession } from 'next-auth'
+import { requireAuth } from '@/lib/auth-helpers'
 import { revalidatePath } from 'next/cache'
 import DOMPurify from 'isomorphic-dompurify'
-
-async function requireAuth() {
-  const session = await getServerSession()
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user
-}
 
 type AuditRow = {
   page_url: string
@@ -138,7 +132,7 @@ export async function generateSeoReport(): Promise<void> {
       'span', 'div', 'a', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
       'img', 'figure', 'figcaption', 'section', 'article',
     ],
-    ALLOWED_ATTR: ['class', 'href', 'target', 'rel', 'src', 'alt', 'style', 'id'],
+    ALLOWED_ATTR: ['class', 'href', 'target', 'rel', 'src', 'alt', 'id'],
     ALLOW_DATA_ATTR: false,
   })
 

@@ -1,14 +1,8 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getServerSession } from 'next-auth'
+import { requireAuth } from '@/lib/auth-helpers'
 import { revalidatePath } from 'next/cache'
-
-async function requireAuth() {
-  const session = await getServerSession()
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user
-}
 
 /** Fetch all categories ordered by post count */
 export async function getCategories() {
@@ -59,6 +53,8 @@ export async function upsertCategory(category: {
   meta_description?: string
   intro?: string
 }) {
+  // No requireAuth() here — this is called server-side by the cron-triggered
+  // content engine (no user session) and by other trusted server code.
   const supabase = createAdminClient()
   const { error } = await (supabase as any)
     .from('blog_categories')
@@ -105,7 +101,10 @@ export async function updateCategory(slug: string, updates: {
 }
 
 /** Adjust post_count by delta (+1 on publish, -1 on unpublish/delete) */
+// TODO: This read-then-write is not atomic and can lose updates under concurrency.
+// Ideally replace with a Supabase RPC that does `UPDATE ... SET post_count = post_count + $1`.
 export async function adjustCategoryCount(slug: string, delta: number) {
+  // No requireAuth() here — callers (e.g. approveDraft) already enforce auth.
   const supabase = createAdminClient()
   const { data } = await (supabase as any)
     .from('blog_categories')

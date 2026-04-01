@@ -8,7 +8,8 @@ export async function uploadContentImage(
   contentType = 'image/png'
 ): Promise<string> {
   const supabase = createAdminClient()
-  const path = `covers/${Date.now()}-${filename}`
+  const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const path = `covers/${Date.now()}-${safeName}`
 
   const { error } = await supabase.storage
     .from(BUCKET)

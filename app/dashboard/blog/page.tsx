@@ -11,8 +11,9 @@ export default async function BlogListPage() {
 
   const { data: posts } = await (supabase
     .from('blog_posts') as any)
-    .select('*')
+    .select('id, title, category, is_published, created_at')
     .order('created_at', { ascending: false })
+    .limit(100)
 
   const columns = [
     { header: 'Title', accessor: 'title' as const },

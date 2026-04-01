@@ -7,7 +7,10 @@ function verifySignature(body: string, signature: string | null, secret: string)
   const hmac = crypto.createHmac('sha256', secret)
   hmac.update(body)
   const expected = hmac.digest('hex')
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+  const sigBuf = Buffer.from(signature)
+  const expectedBuf = Buffer.from(expected)
+  if (sigBuf.length !== expectedBuf.length) return false
+  return crypto.timingSafeEqual(sigBuf, expectedBuf)
 }
 
 export async function POST(request: NextRequest) {
@@ -15,8 +18,12 @@ export async function POST(request: NextRequest) {
   const signature = request.headers.get('x-signature')
   const webhookSecret = process.env.CLICKUP_WEBHOOK_SECRET
 
-  // Verify signature if secret is configured
-  if (webhookSecret && !verifySignature(rawBody, signature, webhookSecret)) {
+  // Fail closed: require webhook secret to be configured
+  if (!webhookSecret) {
+    console.error('[ClickUp Webhook] CLICKUP_WEBHOOK_SECRET not configured')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
+  }
+  if (!verifySignature(rawBody, signature, webhookSecret)) {
     console.error('[ClickUp Webhook] Invalid signature')
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
@@ -112,6 +119,6 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     console.error(`[ClickUp Webhook] Publish failed:`, message)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: 'Publish failed' }, { status: 500 })
   }
 }

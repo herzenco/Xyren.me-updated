@@ -51,7 +51,8 @@ GA4_PROJECT_ID=          # optional`}
 
   const params = await searchParams
   const rangeParam = params.range || '7'
-  const selectedRange = parseInt(rangeParam)
+  const parsed = parseInt(rangeParam)
+  const selectedRange = [7, 30, 90].includes(parsed) ? parsed : 7
 
   // Fetch all GA4 data in parallel
   const [metrics, trends, topPages, trafficSource, deviceBreakdown, geographic] = await Promise.all([

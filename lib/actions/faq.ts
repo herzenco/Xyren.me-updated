@@ -3,14 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getServerSession } from 'next-auth'
+import { requireAuth } from '@/lib/auth-helpers'
 import type { Database } from '@/types/database.types'
-
-async function requireAuth() {
-  const session = await getServerSession()
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user
-}
 
 type FaqItemInsert = Database['public']['Tables']['faq_items']['Insert']
 
@@ -111,10 +105,15 @@ export async function toggleFaqPublished(id: string, currentStatus: boolean) {
     await requireAuth()
     const supabase = createAdminClient()
 
+    const { data: item } = await (supabase.from('faq_items') as any)
+      .select('is_published')
+      .eq('id', id)
+      .single()
+
     const { error } = await (supabase
       .from('faq_items') as any)
       .update({
-        is_published: !currentStatus,
+        is_published: !item.is_published,
       })
       .eq('id', id)
 

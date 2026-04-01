@@ -121,9 +121,14 @@ export async function runSeoAudit() {
     urls.push(`${SITE_URL}/resources/how-to/${guide.slug}`)
   }
 
+  const MAX_URLS = 200
+  const BATCH_SIZE = 5
+  const urlsToAudit = urls.slice(0, MAX_URLS)
   const results = []
-  for (const url of urls) {
-    results.push(await auditUrl(url))
+  for (let i = 0; i < urlsToAudit.length; i += BATCH_SIZE) {
+    const batch = urlsToAudit.slice(i, i + BATCH_SIZE)
+    const batchResults = await Promise.all(batch.map(url => auditUrl(url)))
+    results.push(...batchResults)
   }
 
   await (supabase.from('seo_audit_log') as any).upsert(results, { onConflict: 'page_url' })

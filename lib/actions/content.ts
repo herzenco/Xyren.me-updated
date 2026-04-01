@@ -1,22 +1,26 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getServerSession } from 'next-auth'
+import { requireAuth } from '@/lib/auth-helpers'
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 import { reviseContent } from '@/lib/content-engine/claude'
 import { adjustCategoryCount } from '@/lib/actions/categories'
 
-async function requireAuth() {
-  const session = await getServerSession()
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user
-}
+const updateDraftSchema = z.object({
+  title: z.string().max(255).optional(),
+  content: z.string().max(100000).optional(),
+  excerpt: z.string().max(1000).optional(),
+})
+
+const changesSchema = z.string().min(1).max(2000)
 
 export async function triggerContentEngine(params: {
   type?: string
   topicHint?: string
   category?: string
 }) {
+  await requireAuth()
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:8000'
   const cronSecret = process.env.CRON_SECRET
 
@@ -128,12 +132,14 @@ export async function updateDraft(draftId: string, updates: {
 }) {
   await requireAuth()
 
+  const validated = updateDraftSchema.parse(updates)
+
   const supabase = createAdminClient()
 
   const fields: Record<string, unknown> = {}
-  if (updates.title !== undefined) fields.title = updates.title
-  if (updates.content !== undefined) fields.content = updates.content
-  if (updates.excerpt !== undefined) fields.excerpt = updates.excerpt
+  if (validated.title !== undefined) fields.title = validated.title
+  if (validated.content !== undefined) fields.content = validated.content
+  if (validated.excerpt !== undefined) fields.excerpt = validated.excerpt
 
   if (Object.keys(fields).length === 0) return
 
@@ -151,7 +157,7 @@ export async function updateDraft(draftId: string, updates: {
 export async function requestDraftChanges(draftId: string, changes: string) {
   await requireAuth()
 
-  if (!changes.trim()) return
+  const validatedChanges = changesSchema.parse(changes)
 
   const supabase = createAdminClient()
 
@@ -165,7 +171,7 @@ export async function requestDraftChanges(draftId: string, changes: string) {
 
   const revisedContent = await reviseContent(
     { content: draft.content ?? '', title: draft.title },
-    changes
+    validatedChanges
   )
 
   await (supabase as any)
@@ -173,7 +179,7 @@ export async function requestDraftChanges(draftId: string, changes: string) {
     .update({
       content: revisedContent,
       status: 'pending',
-      requested_changes: changes,
+      requested_changes: validatedChanges,
       revision_count: (draft.revision_count ?? 0) + 1,
     })
     .eq('id', draftId)

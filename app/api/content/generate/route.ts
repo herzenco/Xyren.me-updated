@@ -9,17 +9,10 @@ import { upsertCategory } from '@/lib/actions/categories'
 export const maxDuration = 300
 
 function isAuthorized(request: NextRequest): boolean {
-  // Vercel Cron sends this header automatically
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-  if (isVercelCron) return true
-
-  // Manual trigger with secret
-  const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret && authHeader === `Bearer ${cronSecret}`) return true
-
-  // Allow in development without secret
-  return process.env.NODE_ENV === 'development' && !process.env.CRON_SECRET
+  if (!cronSecret) return false
+  const authHeader = request.headers.get('authorization')
+  return authHeader === `Bearer ${cronSecret}`
 }
 
 export async function POST(request: NextRequest) {
@@ -167,6 +160,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('[ContentEngine] Pipeline failed:', message)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: 'Content generation failed' }, { status: 500 })
   }
 }

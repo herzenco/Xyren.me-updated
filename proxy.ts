@@ -1,29 +1,29 @@
-import { type NextRequest } from 'next/server'
-import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { jwtVerify } from 'jose'
+
+const secret = new TextEncoder().encode(process.env.AUTH_SECRET)
 
 export async function proxy(request: NextRequest) {
-  const session = await getServerSession()
+  const pathname = request.nextUrl.pathname
 
-  // Protect /dashboard routes
-  if (!session && request.nextUrl.pathname.startsWith('/dashboard')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth'
-    return NextResponse.redirect(url)
+  if (!pathname.startsWith('/dashboard')) {
+    return NextResponse.next()
   }
 
-  // Redirect logged-in users away from /auth
-  if (session && request.nextUrl.pathname === '/auth') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
+  const token = request.cookies.get('session-token')?.value
+  if (!token) {
+    return NextResponse.redirect(new URL('/auth', request.url))
   }
 
-  return NextResponse.next()
+  try {
+    await jwtVerify(token, secret)
+    return NextResponse.next()
+  } catch {
+    return NextResponse.redirect(new URL('/auth', request.url))
+  }
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/dashboard/:path*'],
 }

@@ -13,7 +13,7 @@ export default async function SubmissionsListPage({
   const supabase = createAdminClient()
   const { status } = await searchParams
 
-  let query = (supabase.from('contact_submissions') as any).select('*')
+  let query = (supabase.from('contact_submissions') as any).select('id, name, email, business, status, created_at')
 
   if (status && ['new', 'reviewed', 'archived'].includes(status)) {
     query = query.eq('status', status)
@@ -21,7 +21,7 @@ export default async function SubmissionsListPage({
 
   const { data: submissions } = await query.order('created_at', {
     ascending: false,
-  })
+  }).limit(100)
 
   const columns = [
     { header: 'Name', accessor: 'name' as const },
