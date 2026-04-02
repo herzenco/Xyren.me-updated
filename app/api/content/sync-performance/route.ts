@@ -4,7 +4,15 @@ import { isGa4Configured, getTopPages } from '@/lib/ga4'
 
 export const maxDuration = 120
 
+export async function GET(request: NextRequest) {
+  return handleSync(request)
+}
+
 export async function POST(request: NextRequest) {
+  return handleSync(request)
+}
+
+async function handleSync(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
   const authHeader = request.headers.get('authorization')
 

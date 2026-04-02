@@ -15,7 +15,15 @@ function isAuthorized(request: NextRequest): boolean {
   return authHeader === `Bearer ${cronSecret}`
 }
 
+export async function GET(request: NextRequest) {
+  return handleGenerate(request)
+}
+
 export async function POST(request: NextRequest) {
+  return handleGenerate(request)
+}
+
+async function handleGenerate(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
