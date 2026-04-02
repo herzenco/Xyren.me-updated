@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, ArrowRight, Clock } from 'lucide-react'
 import { cache } from 'react'
 import { siteConfig } from '@/lib/config'
@@ -153,43 +151,35 @@ export default async function BlogCategoryPage({ params }: Props) {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="divide-y divide-border">
                 {posts.map((post) => (
                   <Link
                     key={post.slug}
                     href={`/resources/blog/${slug}/${post.slug}`}
-                    className="group"
+                    className="group block py-6 first:pt-0"
                   >
-                    <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all">
-                      <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5" />
-                      <CardContent className="p-5 space-y-3">
-                        <Badge variant="secondary" className="text-xs capitalize">
-                          {post.category}
-                        </Badge>
-                        <h2 className="font-bold leading-snug group-hover:text-primary transition-colors">
-                          {post.title}
-                        </h2>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {post.excerpt}
-                        </p>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                          <span>
-                            {new Date(post.published_at ?? Date.now()).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {post.reading_time} min read
-                          </span>
-                        </div>
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-primary group-hover:gap-2 transition-all">
-                          Read more <ArrowRight className="h-3 w-3" />
-                        </span>
-                      </CardContent>
-                    </Card>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                      <span>
+                        {new Date(post.published_at ?? Date.now()).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {post.reading_time} min
+                      </span>
+                    </div>
+                    <h2 className="text-lg font-bold leading-snug group-hover:text-primary transition-colors">
+                      {post.title}
+                    </h2>
+                    <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                    <span className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-primary group-hover:gap-2 transition-all">
+                      Read more <ArrowRight className="h-3 w-3" />
+                    </span>
                   </Link>
                 ))}
               </div>
