@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { CheckCircle, XCircle, Clock, FileText, TrendingUp, RefreshCw, Eye } from 'lucide-react'
-import { approveDraft, rejectDraft, requestDraftChanges } from '@/lib/actions/content'
+import { approveDraft, rejectDraft } from '@/lib/actions/content'
+import { ChangesForm } from '@/components/dashboard/changes-form'
 import { RunEnginePanel } from '@/components/dashboard/run-engine-panel'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -210,23 +211,3 @@ function DraftCard({ draft, compact = false }: { draft: any; compact?: boolean }
   )
 }
 
-function ChangesForm({ draftId }: { draftId: string }) {
-  async function handleSubmit(formData: FormData) {
-    'use server'
-    const changes = formData.get('changes') as string
-    if (changes?.trim()) await requestDraftChanges(draftId, changes)
-  }
-
-  return (
-    <form action={handleSubmit} className="flex gap-1.5 flex-1">
-      <input
-        name="changes"
-        placeholder="Request changes..."
-        className="h-7 text-xs px-2 rounded-md border border-input bg-background flex-1 min-w-0 focus:outline-none focus:ring-1 focus:ring-primary"
-      />
-      <Button type="submit" size="sm" variant="outline" className="h-7 text-xs flex-shrink-0">
-        Revise
-      </Button>
-    </form>
-  )
-}
