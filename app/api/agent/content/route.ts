@@ -16,12 +16,6 @@ function json(data: unknown, status = 200) {
 }
 
 export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get('authorization') ?? request.headers.get('Authorization') ?? ''
-  const envToken = process.env.LUPE_API_TOKEN ?? ''
-  console.log('DEBUG auth header:', JSON.stringify(authHeader))
-  console.log('DEBUG env token:', JSON.stringify(envToken))
-  console.log('DEBUG match:', authHeader === `Bearer ${envToken}`)
-
   if (!isAuthorized(request)) {
     return json({ ok: false, error: 'Unauthorized' }, 401)
   }
