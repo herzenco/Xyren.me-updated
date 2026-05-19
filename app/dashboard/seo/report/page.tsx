@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { PrintTrigger, PrintButton } from '@/components/dashboard/seo-report-print'
 import { ReportGenerator } from '@/components/dashboard/seo-report-generator'
 
+export const maxDuration = 300
+
 type StatsSnapshot = {
   total_pages: number
   pages_with_issues: number
